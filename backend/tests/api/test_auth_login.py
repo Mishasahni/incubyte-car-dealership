@@ -55,3 +55,12 @@ def test_login_with_bad_credentials_returns_401_with_one_generic_message(
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid email or password"
     assert "access_token" not in response.json()
+
+
+def test_token_from_login_grants_access_to_a_protected_endpoint(client, registered_user):
+    """API-AUTH-11"""
+    token = client.post(LOGIN_URL, json=CREDENTIALS).json()["access_token"]
+
+    response = client.get("/api/vehicles", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 200
