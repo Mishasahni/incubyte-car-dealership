@@ -3,8 +3,10 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlalchemy import func, select
 
 from app.core.security import create_access_token
+from app.models import Vehicle
 from tests.factories import auth_headers, make_user
 
 LIST_URL = "/api/vehicles"
@@ -49,7 +51,9 @@ def test_expired_token_is_rejected(client, db_session, test_settings):
 def test_token_signed_with_another_secret_is_rejected(client, db_session, test_settings):
     """API-AUTHZ-04"""
     user = make_user(db_session)
-    forger = test_settings.model_copy(update={"jwt_secret_key": "another-secret-that-is-32-bytes!!"})
+    forger = test_settings.model_copy(
+        update={"jwt_secret_key": "another-secret-that-is-32-bytes!!"}
+    )
     token = create_access_token(str(user.id), forger)
 
     assert client.get(LIST_URL, headers=bearer(token)).status_code == 401
@@ -63,3 +67,33 @@ def test_token_for_a_deleted_user_is_rejected(client, db_session, test_settings)
     db_session.commit()
 
     assert client.get(LIST_URL, headers=headers).status_code == 401
+
+
+NEW_VEHICLE = {"make": "Ford", "model": "F-150", "category": "Truck", "price": 45000, "quantity": 4}
+
+
+def count_vehicles(session) -> int:
+    return session.scalar(select(func.count()).select_from(Vehicle))
+
+
+def test_regular_user_cannot_create_a_vehicle(client, db_session, test_settings):
+    """API-AUTHZ-08(a): adding vehicles is admin-only (our reading of the frontend rules)."""
+    user = make_user(db_session)
+
+    response = client.post(LIST_URL, json=NEW_VEHICLE, headers=auth_headers(user, test_settings))
+
+    assert response.status_code == 403
+    assert count_vehicles(db_session) == 0
+
+
+def test_admin_role_is_read_from_the_database_not_the_token(client, db_session, test_settings):
+    """API-AUTHZ-10: an admin demoted after login loses admin rights immediately."""
+    admin = make_user(db_session, email="admin@dealership.com", role="admin")
+    old_token_headers = auth_headers(admin, test_settings)
+    admin.role = "user"
+    db_session.commit()
+
+    response = client.post(LIST_URL, json=NEW_VEHICLE, headers=old_token_headers)
+
+    assert response.status_code == 403
+    assert count_vehicles(db_session) == 0
