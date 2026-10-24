@@ -3,9 +3,11 @@
 from datetime import UTC, datetime, timedelta
 
 import jwt
+import pytest
 
 from app.core.config import Settings
 from app.core.security import (
+    InvalidTokenError,
     create_access_token,
     decode_access_token,
     hash_password,
@@ -45,3 +47,21 @@ def test_access_token_carries_its_subject_and_expires_after_the_configured_lifet
     assert decode_access_token(token, SETTINGS) == "42"
     payload = jwt.decode(token, SECRET, algorithms=["HS256"])
     assert payload["exp"] == int((now + timedelta(minutes=60)).timestamp())
+
+
+def test_expired_token_is_rejected():
+    """UT-SEC-05"""
+    two_hours_ago = datetime.now(UTC) - timedelta(hours=2)
+    token = create_access_token("42", SETTINGS, now=two_hours_ago)
+
+    with pytest.raises(InvalidTokenError):
+        decode_access_token(token, SETTINGS)
+
+
+def test_token_signed_with_another_secret_is_rejected():
+    """UT-SEC-06"""
+    other = SETTINGS.model_copy(update={"jwt_secret_key": "a-different-secret-also-32-bytes-long"})
+    token = create_access_token("42", other)
+
+    with pytest.raises(InvalidTokenError):
+        decode_access_token(token, SETTINGS)
