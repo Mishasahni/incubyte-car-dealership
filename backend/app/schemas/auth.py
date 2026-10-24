@@ -1,6 +1,6 @@
 """Request and response bodies for registration and login."""
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 PASSWORD_MIN_LENGTH = 8
 PASSWORD_MAX_LENGTH = 128
@@ -11,3 +11,13 @@ class RegisterRequest(BaseModel):
 
     email: EmailStr
     password: str = Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH)
+
+
+class UserResponse(BaseModel):
+    """Public view of a user. Never includes the password hash."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    role: str

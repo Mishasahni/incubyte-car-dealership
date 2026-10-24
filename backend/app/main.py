@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 
+from app.api.routes import auth
 from app.core.config import Settings, get_settings
 from app.db.session import build_engine, build_session_factory
 
@@ -16,4 +17,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.engine = engine
     app.state.session_factory = build_session_factory(engine)
 
+    app.include_router(auth.router)
     return app

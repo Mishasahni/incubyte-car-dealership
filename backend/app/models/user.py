@@ -12,3 +12,5 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(320), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
+    # Public registration always creates "user"; only the admin CLI grants "admin".
+    role: Mapped[str] = mapped_column(String(20), default="user", server_default="user")
