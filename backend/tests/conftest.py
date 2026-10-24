@@ -44,8 +44,13 @@ def test_settings() -> Settings:
 
 @pytest.fixture(scope="session")
 def test_app(test_settings: Settings) -> Iterator[FastAPI]:
-    """One app for the whole run, with tables created at the start and dropped at the end."""
+    """One app for the whole run, with tables rebuilt at the start and dropped at the end.
+
+    Dropping first means the schema always matches the current models, even if an
+    earlier run was interrupted before its teardown.
+    """
     application = create_app(test_settings)
+    Base.metadata.drop_all(application.state.engine)
     create_tables(application.state.engine)
     yield application
     Base.metadata.drop_all(application.state.engine)
