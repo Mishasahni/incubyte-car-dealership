@@ -21,7 +21,15 @@ def register(body: RegisterRequest, session: DbSession) -> UserResponse:
 
 @router.post("/login", response_model=TokenResponse)
 def login(body: LoginRequest, session: DbSession, settings: AppSettings) -> TokenResponse:
-    user = auth_service.authenticate(session, body.email, body.password)
+    try:
+        user = auth_service.authenticate(session, body.email, body.password)
+    except auth_service.InvalidCredentialsError as error:
+        # One message for both cases, so the response never reveals which emails exist.
+        raise HTTPException(
+            status.HTTP_401_UNAUTHORIZED,
+            "Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from error
     return TokenResponse(
         access_token=create_access_token(str(user.id), settings),
         user=UserResponse.model_validate(user),
