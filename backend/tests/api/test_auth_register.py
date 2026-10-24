@@ -61,3 +61,14 @@ def test_register_ignores_a_requested_admin_role(client, db_session):
     assert response.status_code == 201
     assert response.json()["role"] == "user"
     assert db_session.scalars(select(User)).one().role == "user"
+
+
+def test_register_rejects_an_email_that_is_already_registered(client, db_session):
+    """API-AUTH-03"""
+    client.post(REGISTER_URL, json=VALID)
+
+    response = client.post(REGISTER_URL, json=VALID | {"password": "Another-pass"})
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Email already registered"
+    assert count_users(db_session) == 1
