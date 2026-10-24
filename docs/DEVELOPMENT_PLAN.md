@@ -245,7 +245,17 @@ Order follows the user's priorities, adjusted only where a dependency requires i
 
 ### 8.2 Co-author trailer — exact format
 
-The assignment requires, at the end of the message, **two empty lines followed by** `Co-authored-by: AI Tool Name <AI@users.noreply.github.com>`. Confirmed form (D-18): the placeholder "AI Tool Name" is replaced by the tool's name and the email is kept exactly as written:
+The assignment requires, at the end of the message, **two empty lines followed by** a co-author trailer, and shows the sample `Co-authored-by: AI Tool Name <AI@users.noreply.github.com>`. Its wording does not say whether that email is required text or part of the example (the whole sample command is illustrative and uniformly formatted).
+
+**Correction (2026-10-25).** `AI@users.noreply.github.com` is GitHub's no-reply address format for the account whose username is `ai`, which belongs to an unrelated developer (Andrey Sitnik, github.com/ai). GitHub therefore credited that person as co-author of every commit using it: this repository's commit pages list `login: ai` (profile "Andrey Sitnik") as co-author, and the GitHub API confirms the account. The repository's Contributors section also showed them.
+
+- The first 29 commits, `5c54df1` through `16bd017`, used the sample address. They were already pushed and are **left unchanged** rather than rewriting public history.
+- The 11 M4 commits had not been pushed. Only their trailer lines were corrected before pushing; their code, order, authors and author dates are unchanged. They were originally `64a3149`…`203abcb` and are now `e70827a`…`7398e45`.
+- From M4 on, each tool's own official no-reply address is used. GitHub attributes these to the vendors' own accounts, verified on real public commits:
+  - `noreply@anthropic.com` → github.com/claude (Anthropic)
+  - `noreply@openai.com` → github.com/codex, OpenAI's Codex account (so ChatGPT co-authorship is shown under the Codex name)
+
+Current form (D-18): the two empty lines and the `Co-authored-by:` key exactly as the assignment shows, the tool's name, and its vendor's address:
 
 ```
 feat: reject purchase when vehicle is out of stock
@@ -254,10 +264,10 @@ Claude Code wrote the atomic UPDATE in inventory_service and the 409
 mapping; I reviewed the SQL and the failing test before accepting it.
 
 
-Co-authored-by: Claude Code <AI@users.noreply.github.com>
+Co-authored-by: Claude Code <noreply@anthropic.com>
 ```
 
-When ChatGPT also contributed to a commit (e.g. it helped write the prompt or plan that produced the change), a second line `Co-authored-by: ChatGPT <AI@users.noreply.github.com>` follows directly under the first, and the body says what each tool did.
+When ChatGPT also contributed to a commit (e.g. it helped write the prompt or plan that produced the change), a second line `Co-authored-by: ChatGPT <noreply@openai.com>` follows directly under the first, and the body says what each tool did.
 
 By default Git **collapses consecutive blank lines** in commit messages (`git commit -m` uses the `whitespace` cleanup mode), which would turn the two empty lines into one. So each AI-assisted commit is made from a message file kept outside the repository:
 

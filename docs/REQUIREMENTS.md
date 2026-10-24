@@ -290,7 +290,7 @@ Password policy: 8–128 characters (P).
 | REQ-PROC-02 | Aim for **high test coverage with meaningful test cases**. Coverage is measured and reported honestly; any percentage target in the test plan is our goal, not an assignment requirement. | A |
 | REQ-PROC-03 | **Clean code**: readable, maintainable; follow **SOLID** and other good design practice; well documented with meaningful comments and clear naming. | A |
 | REQ-PROC-04 | **Git**: commit frequently with clear, descriptive messages that narrate the development journey. | A |
-| REQ-AI-01 | **AI co-authorship**: every commit where an AI tool was used must add the AI as co-author: at the end of the commit message, **two empty lines, then a trailer** in the form `Co-authored-by: AI Tool Name <AI@users.noreply.github.com>`. | A |
+| REQ-AI-01 | **AI co-authorship**: every commit where an AI tool was used must add the AI as co-author: at the end of the commit message, **two empty lines, then a trailer** in the form `Co-authored-by: AI Tool Name <AI@users.noreply.github.com>` (the assignment's sample; for the address actually used, and why, see D-18). | A |
 | REQ-AI-02 | **README section titled exactly "My AI Usage"**, describing: which AI tools were used; how they were used; a reflection on how AI affected the workflow. Must be *detailed*. | A |
 | REQ-AI-03 | Be prepared to **discuss AI usage in detail during the interview**. Not a repository artefact, but every part of the submission must be understood by the candidate. | A |
 
@@ -374,7 +374,7 @@ Status: **Confirmed** = decided by the user; **Default** = documented default ad
 | D-15 | Purchase history? | Not stored. | Default |
 | D-16 | Test report format and location. | `docs/TEST_REPORT.md`, verbatim real output, dated, with commit hash. | Default |
 | D-17 | Status codes. | §2 conventions table. | Default |
-| D-18 | Co-author trailer format. | The assignment's exact format: message, then **two empty lines**, then `Co-authored-by: AI Tool Name <AI@users.noreply.github.com>`, with the placeholder "AI Tool Name" replaced by the tool used (`Claude Code`, `ChatGPT`) and the email kept literally. One trailer line per tool that contributed to the commit. See DEVELOPMENT_PLAN §8.2. | Confirmed |
+| D-18 | Co-author trailer format. | The message, then **two empty lines**, then `Co-authored-by: <tool name> <vendor no-reply address>`: `Claude Code <noreply@anthropic.com>` and `ChatGPT <noreply@openai.com>`. One trailer line per tool that contributed to the commit. Corrected on 2026-10-25: the assignment's sample address `AI@users.noreply.github.com` is GitHub's no-reply format for the unrelated user `@ai`, so it credited a stranger. The 29 already-pushed commits keep it; the 11 unpushed M4 commits were corrected before pushing. Details in DEVELOPMENT_PLAN §8.2. | Confirmed |
 | D-19 | `PROMPTS.md` content. Tools used (per the user): **ChatGPT** — formulating and refining implementation prompts and discussing project planning; **Claude Code** — revising the planning documents and implementation. The user does not want unrelated casual conversation in the repository. The assignment asks for "raw, unedited AI chat logs or public chat links (no AI-generated summaries)" and says nothing more about scope or format. | How to meet that with project-relevant material only, without editing logs or passing off summaries as transcripts: see DEVELOPMENT_PLAN §9. | **Open** |
 
 ---
