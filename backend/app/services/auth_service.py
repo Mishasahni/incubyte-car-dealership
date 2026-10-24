@@ -39,3 +39,20 @@ def authenticate(session: Session, email: str, password: str) -> User:
     if user is None or not verify_password(password, user.password_hash):
         raise InvalidCredentialsError
     return user
+
+
+def find_user_by_email(session: Session, email: str) -> User | None:
+    return session.scalar(select(User).where(User.email == email))
+
+
+def promote_to_admin(session: Session, user: User) -> None:
+    user.role = "admin"
+    session.commit()
+
+
+def create_admin(session: Session, email: str, password: str) -> User:
+    """Create an admin account. Only the admin CLI calls this; no endpoint can."""
+    user = User(email=email, password_hash=hash_password(password), role="admin")
+    session.add(user)
+    session.commit()
+    return user
