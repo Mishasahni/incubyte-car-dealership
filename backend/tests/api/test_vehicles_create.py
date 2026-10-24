@@ -9,7 +9,13 @@ from app.models import Vehicle
 from tests.factories import auth_headers, make_user
 
 URL = "/api/vehicles"
-VALID = {"make": "Toyota", "model": "Corolla", "category": "Sedan", "price": 21999.99, "quantity": 3}
+VALID = {
+    "make": "Toyota",
+    "model": "Corolla",
+    "category": "Sedan",
+    "price": 21999.99,
+    "quantity": 3,
+}
 
 
 @pytest.fixture
