@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.models import User
 
 
@@ -26,4 +26,16 @@ def register_user(session: Session, email: str, password: str) -> User:
         # constraint decides, and the loser gets the same error as a sequential duplicate.
         session.rollback()
         raise DuplicateEmailError(email) from error
+    return user
+
+
+class InvalidCredentialsError(Exception):
+    """Raised when the email is unknown or the password does not match."""
+
+
+def authenticate(session: Session, email: str, password: str) -> User:
+    """Return the user whose email and password match."""
+    user = session.scalar(select(User).where(User.email == email))
+    if user is None or not verify_password(password, user.password_hash):
+        raise InvalidCredentialsError
     return user
