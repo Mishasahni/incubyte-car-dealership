@@ -49,3 +49,12 @@ def test_database_rejects_a_negative_quantity(db_session):
             text("UPDATE vehicles SET quantity = -1 WHERE id = :id"), {"id": vehicle.id}
         )
     db_session.rollback()
+
+
+def test_database_rejects_a_price_that_is_not_positive(db_session):
+    """IT-DB-03: a vehicle priced at zero cannot be stored."""
+    db_session.add(make_vehicle(price=Decimal("0")))
+
+    with pytest.raises(IntegrityError):
+        db_session.commit()
+    db_session.rollback()
