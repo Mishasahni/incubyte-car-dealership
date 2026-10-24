@@ -11,6 +11,10 @@ from app.core.config import Settings
 _password_hash = PasswordHash.recommended()
 
 
+class InvalidTokenError(Exception):
+    """Raised for any token that is expired, malformed, or not signed with our secret."""
+
+
 def hash_password(password: str) -> str:
     return _password_hash.hash(password)
 
@@ -29,5 +33,8 @@ def create_access_token(subject: str, settings: Settings, now: datetime | None =
 
 def decode_access_token(token: str, settings: Settings) -> str:
     """Return the token's subject. The algorithm is pinned so ``alg`` cannot be swapped."""
-    payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    try:
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    except jwt.InvalidTokenError as error:
+        raise InvalidTokenError("Invalid or expired token") from error
     return payload["sub"]
