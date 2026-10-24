@@ -2,7 +2,9 @@
 
 from decimal import Decimal
 
-from sqlalchemy import select
+import pytest
+from sqlalchemy import select, text
+from sqlalchemy.exc import IntegrityError
 
 from app.models.vehicle import Vehicle
 
@@ -34,3 +36,16 @@ def test_vehicle_is_persisted_and_readable_from_a_new_session(test_app, db_sessi
         Decimal("21999.99"),
         3,
     )
+
+
+def test_database_rejects_a_negative_quantity(db_session):
+    """IT-DB-02: even raw SQL that bypasses the API cannot make stock negative."""
+    vehicle = make_vehicle()
+    db_session.add(vehicle)
+    db_session.commit()
+
+    with pytest.raises(IntegrityError):
+        db_session.execute(
+            text("UPDATE vehicles SET quantity = -1 WHERE id = :id"), {"id": vehicle.id}
+        )
+    db_session.rollback()
