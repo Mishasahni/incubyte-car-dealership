@@ -36,3 +36,22 @@ def test_login_with_missing_fields_returns_422(client, payload):
     response = client.post(LOGIN_URL, json=payload)
 
     assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "credentials",
+    [
+        CREDENTIALS | {"password": "wrong-password"},
+        {"email": "nobody@dealership.com", "password": "Secr3t-pass"},
+    ],
+    ids=["wrong-password", "unknown-email"],
+)
+def test_login_with_bad_credentials_returns_401_with_one_generic_message(
+    client, registered_user, credentials
+):
+    """API-AUTH-08 and API-AUTH-09: the same message, so accounts cannot be enumerated."""
+    response = client.post(LOGIN_URL, json=credentials)
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid email or password"
+    assert "access_token" not in response.json()
