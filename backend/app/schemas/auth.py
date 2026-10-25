@@ -1,5 +1,7 @@
 """Request and response bodies for registration and login."""
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 PASSWORD_MIN_LENGTH = 8
@@ -32,3 +34,10 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class DemoStatus(BaseModel):
+    """Whether demo sign-in is offered, and for which roles."""
+
+    enabled: bool
+    roles: list[Literal["buyer", "admin"]]
