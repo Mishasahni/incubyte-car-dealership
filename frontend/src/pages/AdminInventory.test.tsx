@@ -74,6 +74,19 @@ describe('Add vehicle', () => {
     expect(createVehicle).not.toHaveBeenCalled()
   })
 
+  it('rejects a price longer than the backend accepts (found in the browser check)', async () => {
+    await openInventoryAs(ADMIN)
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Add vehicle' }))
+    const dialog = screen.getByRole('dialog', { name: 'Add vehicle' })
+
+    await fill(dialog, { Make: 'Kia', Model: 'Seltos', Category: 'SUV', Price: '11990001199000', Quantity: '5' })
+    await user.click(within(dialog).getByRole('button', { name: 'Save vehicle' }))
+
+    expect(within(dialog).getByText('Price must be below ₹10,00,00,00,000')).toBeInTheDocument()
+    expect(createVehicle).not.toHaveBeenCalled()
+  })
+
   it('FE-ADM-04: saves a valid vehicle, closes the panel and lists it', async () => {
     vi.mocked(createVehicle).mockResolvedValue({ id: 9, make: 'Ford', model: 'F-150', category: 'Truck', price: 45000, quantity: 4 })
     await openInventoryAs(ADMIN)
