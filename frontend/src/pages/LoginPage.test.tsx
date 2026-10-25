@@ -55,6 +55,55 @@ describe('Login page', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password')
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Email')).toHaveValue('buyer@dealership.com')
     expect(loadSession()).toBeNull()
+  })
+
+  it('FE-AUTH-11: shows the Masar Auto brand panel and the sign-in copy', () => {
+    renderApp('/login')
+
+    expect(screen.getByRole('img', { name: 'Masar Auto' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(screen.getByText('Sign in to continue to your account.')).toBeInTheDocument()
+    expect(screen.getByLabelText('Email')).toHaveAttribute('autocomplete', 'email')
+    expect(screen.getByLabelText('Password')).toHaveAttribute('autocomplete', 'current-password')
+  })
+
+  it('FE-AUTH-12: the password visibility toggle shows and hides the password', async () => {
+    renderApp('/login')
+    const user = userEvent.setup()
+    const password = screen.getByLabelText('Password')
+    await user.type(password, 'Secr3t-pass')
+    expect(password).toHaveAttribute('type', 'password')
+
+    await user.click(screen.getByRole('button', { name: 'Show password' }))
+    expect(password).toHaveAttribute('type', 'text')
+
+    await user.click(screen.getByRole('button', { name: 'Hide password' }))
+    expect(password).toHaveAttribute('type', 'password')
+    expect(password).toHaveValue('Secr3t-pass')
+  })
+
+  it('FE-AUTH-13: disables Sign in while the request is in flight', async () => {
+    vi.mocked(login).mockReturnValue(new Promise(() => {}))
+    renderApp('/login')
+
+    await submitLogin('buyer@dealership.com', 'Secr3t-pass')
+
+    const button = screen.getByRole('button', { name: 'Signing in…' })
+    expect(button).toBeDisabled()
+    await userEvent.setup().click(button)
+    expect(login).toHaveBeenCalledTimes(1)
+  })
+
+  it('FE-AUTH-14: "Create an account" opens registration, and "Sign in" comes back', async () => {
+    renderApp('/login')
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('link', { name: 'Create an account' }))
+    expect(screen.getByRole('heading', { name: 'Create your account' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: 'Sign in' }))
+    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
   })
 })

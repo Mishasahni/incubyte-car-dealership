@@ -13,7 +13,7 @@ describe('Session and routing', () => {
   it('FE-AUTH-09: sends a visitor without a session to the login page', () => {
     renderApp('/')
 
-    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
   })
 
   it('FE-AUTH-08: logging out from the account menu clears the session and returns to the login page', async () => {
@@ -26,7 +26,7 @@ describe('Session and routing', () => {
     await user.click(screen.getByRole('button', { name: /buyer@dealership\.com/ }))
     await user.click(screen.getByRole('button', { name: 'Log out' }))
 
-    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
     expect(loadSession()).toBeNull()
   })
 })
@@ -56,6 +56,6 @@ describe('Role-aware experiences', () => {
   it('FE-ROLE-03: a visitor without a session who opens /admin is sent to sign in', () => {
     renderApp('/admin')
 
-    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
   })
 })

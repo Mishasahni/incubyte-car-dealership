@@ -52,4 +52,26 @@ describe('Register page', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Email already registered')
     expect(login).not.toHaveBeenCalled()
   })
+
+  it('FE-AUTH-15: shows the companion layout, the real password rule and a toggle', async () => {
+    renderApp('/register')
+
+    expect(screen.getByRole('img', { name: 'Masar Auto' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Create your account' })).toBeInTheDocument()
+    expect(screen.getByText('8–128 characters')).toBeInTheDocument()
+    expect(screen.getByLabelText('Password')).toHaveAttribute('autocomplete', 'new-password')
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Show password' }))
+    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'text')
+  })
+
+  it('FE-AUTH-16: disables Create account while the request is in flight', async () => {
+    vi.mocked(register).mockReturnValue(new Promise(() => {}))
+    renderApp('/register')
+
+    await submitRegistration('buyer@dealership.com', 'Secr3t-pass')
+
+    expect(screen.getByRole('button', { name: 'Creating account…' })).toBeDisabled()
+    expect(register).toHaveBeenCalledTimes(1)
+  })
 })
