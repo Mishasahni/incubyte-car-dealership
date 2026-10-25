@@ -232,8 +232,14 @@ See **[docs/TEST_REPORT.md](docs/TEST_REPORT.md)**. It holds verbatim output fro
 
 ### Tools used
 
-- **Claude Code** (Anthropic, model Claude Opus 5.5), in the Claude desktop app. Used for planning, implementation, tests, debugging and documentation throughout the project.
-- **ChatGPT** (OpenAI). Used to formulate and refine the prompts given to Claude Code and to discuss project planning.
+- **Claude Code** (Anthropic, model Claude Opus 5.5), in the Claude desktop app. The primary tool: the coding agent that worked directly in this repository, used for planning, implementation, tests, debugging and documentation throughout the project.
+- **ChatGPT** (OpenAI). A supplementary tool, used outside the repository for:
+  - planning;
+  - clarifying concepts;
+  - reviewing parts of the workflow;
+  - formulating and refining some of the prompts I gave Claude Code.
+
+  It did not edit code or run commands in this repository.
 
 ### How they were used
 
@@ -244,11 +250,15 @@ See **[docs/TEST_REPORT.md](docs/TEST_REPORT.md)**. It holds verbatim output fro
   - finding that the assignment's sample co-author email credited an unrelated GitHub user;
   - making the concurrency test fail reliably.
 - **Frontend and verification:** Claude Code built the React UI from a layout I approved. It tested the flows in a browser against the real backend, found and fixed a validation gap and a phone-layout problem, and took the screenshots.
-- **Prompting:** I used ChatGPT to turn my goals into precise, staged instructions for Claude Code, with explicit stop points for approval.
-- **Git:** every AI-assisted commit names Claude Code as co-author.
+- **Prompting and review:** I used ChatGPT to help turn my goals into staged instructions for Claude Code, with explicit stop points for approval. I also used it to clarify concepts and to review parts of the workflow.
+- **Git:**
+  - every AI-assisted commit names Claude Code as co-author;
+  - the first commit (the planning documents) also names ChatGPT, which helped with the planning prompts.
 
 ### Reflection
 
 > _To be written in my own words before submission: how AI changed the workflow, what worked, what needed correcting, and what I would do differently._
 
-The AI conversations behind this project are recorded in [`PROMPTS.md`](PROMPTS.md).
+### Evidence
+
+[`PROMPTS.md`](PROMPTS.md) links the raw, unedited exports of every Claude Code session used for this project, in [`prompts/`](prompts/). The ChatGPT conversations aren't included there; this section describes what ChatGPT was used for.

@@ -16,7 +16,7 @@ Related documents: `docs/REQUIREMENTS.md` (requirement IDs, API contract §2, de
 | **Confirmed by the user** | Stack: FastAPI, PostgreSQL, SQLAlchemy, JWT, secure password hashing, React, TypeScript, Vite, Tailwind CSS, pytest, HTTPX, Vitest, React Testing Library. Admin-only add/update (our interpretation, REQ-AUTH-05). Admin CLI with secure prompt and no public admin endpoint (REQ-AUTH-06). Registration always creates a regular user. Deadline 25 Oct 2026 22:00 IST. Public repo <https://github.com/Mishasahni/incubyte-car-dealership>. Optional features only after mandatory work is complete. |
 | **Documented defaults** | API contract and validation rules (REQUIREMENTS §2–3, D-03–D-17); library choices in §3; `create_all` init script instead of migrations; `vi.mock` instead of MSW; manual E2E instead of Playwright. |
 | **Confirmed setup decisions (user, 2026-10-24)** | D-18 trailer format (§8.2). Node.js may be installed if missing, from a trusted official source, without changing unrelated software. Pushes to the existing public repo are allowed after each completed milestone, once tests pass, the changes are reviewed, and the commit summary plus a no-secrets/no-unrelated-files check has been shown to the user; no force-push or history rewriting; failing or unverified work is never pushed. PostgreSQL: a dedicated least-privilege app role plus separate dev and test databases, credentials only in local environment variables or an ignored `.env`; no change to existing roles, databases, or server configuration without showing the change and getting approval. Git identity is never invented, and global Git config is not modified. |
-| **Still open** | D-19 (`PROMPTS.md` content); the Git name/email to use; the Node.js install method (§3.2); running the PostgreSQL setup (§3.3), which needs the user's administrator password. |
+| **Still open** | The Git name/email to use; the Node.js install method (§3.2); running the PostgreSQL setup (§3.3), which needs the user's administrator password. |
 
 ---
 
@@ -285,7 +285,7 @@ Checked after the first such commit (and spot-checked later) with `git log -1 --
 |---|---|
 | **README.md** | Overview; architecture summary; the permission matrix and the REQ-AUTH-05 interpretation; prerequisites (Python, Node, PostgreSQL); backend setup (venv, install, `.env`, create DBs, `init_db`, `create_admin`, run); frontend setup (install, `.env`, run); how to run tests; endpoint table; screenshots; test report summary + link; **"My AI Usage"**; known limitations (no migrations, `localStorage` token, no order history). Setup steps verified by following them on a fresh clone. |
 | **My AI Usage** | Finalised by the user in their own words: **ChatGPT** (formulating and refining implementation prompts; discussing project planning) and **Claude Code** with Claude Opus 5.5 (revising the planning documents; implementation, tests, debugging); how each was used; reflection. Must agree with `PROMPTS.md` and the commit trailers. |
-| **PROMPTS.md** | Assignment wording: "A root PROMPTS.md containing your raw, unedited AI chat logs or public chat links (no AI-generated summaries)." It must cover the project's AI use by **both** ChatGPT and Claude Code. Each entry is either the raw log of a project conversation or a real public link to it, headed only with date, tool, and what the conversation was for. No summaries presented as logs, no reconstructed or invented content. How to keep it project-relevant (excluding unrelated casual conversation) while staying raw and unedited is open decision D-19. Secrets are never typed into AI chats; any unavoidable redaction is marked in place. Entries are added as sessions happen, not reconstructed at the end. |
+| **PROMPTS.md** | Assignment wording: "A root PROMPTS.md containing your raw, unedited AI chat logs or public chat links (no AI-generated summaries)." The plan was for it to cover both ChatGPT and Claude Code; see the D-19 decision below. Each entry is either the raw log of a project conversation or a real public link to it, headed only with date, tool, and what the conversation was for. No summaries presented as logs, no reconstructed or invented content. **Decided (D-19, 2026-10-25):** `PROMPTS.md` links the raw Claude Code session exports in `prompts/`; ChatGPT logs are not included, and `PROMPTS.md` and the README say so. Secrets are never typed into AI chats; any unavoidable redaction is marked in place. Entries are added as sessions happen, not reconstructed at the end. |
 | **Screenshots** | Real captures from the running app in `docs/screenshots/`: login, register, dashboard (desktop and phone width), search results, zero-stock disabled button, admin add/edit form, delete confirmation, regular-user view without admin controls. |
 | **Test report** | `docs/TEST_REPORT.md`: verbatim output of the final real runs with coverage, date/time, commit hash, and E2E checklist results (TEST_PLAN §8). |
 
@@ -301,7 +301,7 @@ Checked after the first such commit (and spot-checked later) with `git log -1 --
 - [ ] `git log` shows test-first commits for backend features; no fabricated red phases.
 - [ ] Every AI-assisted commit has the two-empty-lines + `Co-authored-by` trailer.
 - [ ] README has explanation, setup/run for both apps, screenshots, test report, "My AI Usage".
-- [ ] Root `PROMPTS.md` covers **all** AI sessions used, raw or as real links.
+- [ ] Root `PROMPTS.md` covers every Claude Code session used, as raw exports, and states that ChatGPT logs are not included (D-19).
 - [ ] No secrets in the repository or its history.
 - [ ] Final commit visible at <https://github.com/Mishasahni/incubyte-car-dealership> while logged out, before 22:00 IST.
 - [ ] The user can explain every part of the code and the AI's role in it (REQ-AI-03).
@@ -331,7 +331,7 @@ Checked after the first such commit (and spot-checked later) with `git log -1 --
 Resolved: D-18 (§8.2); permission to install Node.js; push policy (§1); PostgreSQL approach (§3.3).
 
 Still needed:
-1. **D-19** — how `PROMPTS.md` will meet the assignment wording with project-relevant material only (§9).
+1. **D-19** — how `PROMPTS.md` will meet the assignment wording with project-relevant material only (§9). *Decided 2026-10-25; see §9.*
 2. **Git identity** — no identity is configured anywhere (§3.1). The name and email to set in this repository's local config (e.g. the GitHub noreply address, if commits should link to the GitHub account).
 3. ~~Node.js~~ — done (§3.1).
 4. ~~PostgreSQL~~ — done: role `car_dealership_app` and databases `car_dealership` / `car_dealership_test` exist; login verified (§3.1). The user creates `backend/.env` locally with the credentials.
