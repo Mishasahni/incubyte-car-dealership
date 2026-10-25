@@ -24,6 +24,10 @@ class VehicleCreate(BaseModel):
     quantity: StockQuantity
 
 
+# PUT is a full replacement, so an update carries exactly the same fields and rules as a create.
+VehicleUpdate = VehicleCreate
+
+
 class VehicleResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

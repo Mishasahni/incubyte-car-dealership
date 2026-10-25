@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, status
 
 from app.api.deps import DbSession, get_current_user, require_admin
-from app.schemas.vehicle import VehicleCreate, VehicleResponse
+from app.schemas.vehicle import VehicleCreate, VehicleResponse, VehicleUpdate
 from app.services import vehicle_service
 
 router = APIRouter(
@@ -26,3 +26,8 @@ def list_vehicles(session: DbSession) -> list[VehicleResponse]:
 )
 def create_vehicle(body: VehicleCreate, session: DbSession) -> VehicleResponse:
     return VehicleResponse.model_validate(vehicle_service.create_vehicle(session, body))
+
+
+@router.put("/{vehicle_id}", response_model=VehicleResponse)
+def update_vehicle(vehicle_id: int, body: VehicleUpdate, session: DbSession) -> VehicleResponse:
+    return VehicleResponse.model_validate(vehicle_service.update_vehicle(session, vehicle_id, body))
