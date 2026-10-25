@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    # Browser origins allowed to call the API (the Vite dev server by default).
+    cors_origins: list[str] = ["http://localhost:5173"]
 
 
 @lru_cache
