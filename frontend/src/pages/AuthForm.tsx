@@ -39,13 +39,11 @@ export function AuthForm({ title, subtitle, submitLabel, enforcePasswordPolicy, 
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="mb-8">
-          <Wordmark />
-        </div>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-8 px-4 py-12">
+      <Wordmark />
+      <div className="w-full max-w-sm rounded bg-surface p-6 sm:p-8">
         <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-        <p className="mt-1 mb-6 text-sm text-silver">{subtitle}</p>
+        <p className="mt-1 mb-6 text-sm text-muted">{subtitle}</p>
         <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
           {notice && <Alert tone="info">{notice}</Alert>}
           {serverError && <Alert>{serverError}</Alert>}
@@ -70,7 +68,7 @@ export function AuthForm({ title, subtitle, submitLabel, enforcePasswordPolicy, 
             {submitting ? 'Please wait…' : submitLabel}
           </Button>
         </form>
-        <p className="mt-6 text-sm text-silver">{footer}</p>
+        <p className="mt-6 text-sm text-muted">{footer}</p>
       </div>
     </main>
   )

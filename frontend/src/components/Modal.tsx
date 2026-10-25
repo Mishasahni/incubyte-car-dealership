@@ -46,25 +46,25 @@ export function Modal({ title, onClose, children, variant = 'dialog', role = 'di
 
   const layout =
     variant === 'panel'
-      ? 'fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[28rem] sm:border-l'
-      : 'fixed top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-lg border'
+      ? 'fixed inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[30rem]'
+      : 'fixed top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded'
 
   return (
     <div className="fixed inset-0 z-50" onKeyDown={handleKeyDown}>
-      <div aria-hidden="true" className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div aria-hidden="true" className="absolute inset-0 bg-ink/40" onClick={onClose} />
       <div
         ref={boxRef}
         role={role}
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className={`${layout} flex flex-col overflow-y-auto border-line bg-panel p-6 shadow-2xl shadow-black/40`}
+        className={`${layout} flex flex-col overflow-y-auto bg-surface p-6 shadow-2xl shadow-black/20 sm:p-7`}
       >
-        <h2 id={titleId} className="text-lg font-semibold tracking-tight">
+        <h2 id={titleId} className="text-xl font-semibold tracking-tight">
           {title}
         </h2>
         {description && (
-          <p id={descriptionId} className="mt-1 text-sm text-silver">
+          <p id={descriptionId} className="mt-1.5 text-sm text-muted">
             {description}
           </p>
         )}

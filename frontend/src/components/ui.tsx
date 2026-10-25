@@ -1,15 +1,14 @@
-import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 
-type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'dark' | 'secondary' | 'ghost' | 'danger' | 'danger-ghost'
 
 const BUTTON_STYLES: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent-strong disabled:bg-raised disabled:text-silver',
-  // Repeated row actions use the accent as an outline so the page keeps one strong action.
-  outline:
-    'border border-accent/60 text-mist hover:border-accent hover:bg-accent hover:text-white disabled:border-line disabled:bg-transparent disabled:text-silver',
-  secondary: 'border border-line bg-raised text-mist hover:border-silver/60 disabled:text-silver/60',
-  ghost: 'text-silver hover:text-mist disabled:text-silver/50',
-  danger: 'bg-danger text-white hover:bg-danger/85 disabled:bg-raised disabled:text-silver',
+  primary: 'bg-accent text-white hover:bg-accent-strong disabled:bg-hairline disabled:text-muted',
+  dark: 'bg-ink text-white hover:bg-graphite disabled:bg-hairline disabled:text-muted',
+  secondary: 'border border-line bg-surface text-ink hover:border-muted disabled:text-muted',
+  ghost: 'text-ink hover:bg-hairline disabled:text-muted',
+  danger: 'bg-danger text-white hover:bg-danger/90 disabled:bg-hairline disabled:text-muted',
+  'danger-ghost': 'text-danger hover:bg-danger-soft disabled:text-muted',
 }
 
 export function Button({
@@ -19,9 +18,24 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
   return (
     <button
-      className={`inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed ${BUTTON_STYLES[variant]} ${className}`}
+      className={`inline-flex h-10 items-center justify-center gap-2 rounded px-4 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed ${BUTTON_STYLES[variant]} ${className}`}
       {...props}
     />
+  )
+}
+
+const LABEL = 'text-[13px] font-medium text-graphite'
+const CONTROL =
+  'h-10 w-full min-w-0 rounded border bg-surface px-3 text-sm text-ink placeholder:text-muted/70 transition-colors'
+
+/** Links a field's validation message (or hint) to it for screen readers. */
+function FieldMessage({ id, error, hint }: { id: string; error?: string; hint?: string }) {
+  const message = error ?? hint
+  if (!message) return null
+  return (
+    <p id={id} className={`text-xs ${error ? 'font-medium text-danger' : 'text-muted'}`}>
+      {message}
+    </p>
   )
 }
 
@@ -35,47 +49,60 @@ export function TextField({
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string; hint?: string }) {
   const id = useId()
   const messageId = `${id}-message`
-  const message = error ?? hint
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
-      <label htmlFor={id} className="text-xs font-medium tracking-wide text-silver uppercase">
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
+      <label htmlFor={id} className={LABEL}>
         {label}
       </label>
       <input
         id={id}
         aria-invalid={error ? true : undefined}
-        aria-describedby={message ? messageId : undefined}
-        className={`h-10 rounded-md border bg-ink px-3 text-sm text-mist placeholder:text-silver/50 ${
-          error ? 'border-danger' : 'border-line hover:border-silver/50'
-        }`}
+        aria-describedby={error || hint ? messageId : undefined}
+        className={`${CONTROL} ${error ? 'border-danger' : 'border-line hover:border-muted'}`}
         {...props}
       />
-      {message && (
-        <p id={messageId} className={`text-xs ${error ? 'text-danger' : 'text-silver'}`}>
-          {message}
-        </p>
-      )}
+      <FieldMessage id={messageId} error={error} hint={hint} />
+    </div>
+  )
+}
+
+/** A labelled native select, styled like the text fields. */
+export function SelectField({
+  label,
+  className = '',
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement> & { label: string }) {
+  const id = useId()
+  return (
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
+      <label htmlFor={id} className={LABEL}>
+        {label}
+      </label>
+      <select id={id} className={`${CONTROL} border-line pr-8 hover:border-muted`} {...props}>
+        {children}
+      </select>
     </div>
   )
 }
 
 export function Alert({ tone = 'error', children }: { tone?: 'error' | 'success' | 'info'; children: ReactNode }) {
   const styles = {
-    error: 'border-danger/40 bg-danger/10 text-mist',
-    success: 'border-success/40 bg-success/10 text-mist',
-    info: 'border-line bg-raised text-mist',
+    error: 'border-danger/25 bg-danger-soft text-danger',
+    success: 'border-success/25 bg-success-soft text-success',
+    info: 'border-accent/25 bg-accent/5 text-graphite',
   }[tone]
   return (
-    <div role={tone === 'error' ? 'alert' : 'status'} className={`rounded-md border px-3 py-2 text-sm ${styles}`}>
+    <div role={tone === 'error' ? 'alert' : 'status'} className={`rounded border px-4 py-3 text-sm font-medium ${styles}`}>
       {children}
     </div>
   )
 }
 
-export function Wordmark() {
+export function Wordmark({ className = 'text-ink' }: { className?: string }) {
   return (
-    <span className="text-xs font-semibold tracking-[0.14em] whitespace-nowrap text-mist uppercase sm:text-sm sm:tracking-[0.18em]">
-      Dealership <span className="text-silver">Inventory</span>
+    <span className={`text-[13px] font-semibold tracking-[0.32em] whitespace-nowrap uppercase ${className}`}>
+      Dealership
     </span>
   )
 }

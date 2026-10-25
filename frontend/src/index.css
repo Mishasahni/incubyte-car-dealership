@@ -1,26 +1,38 @@
 @import 'tailwindcss';
 
-/* Design tokens: graphite surfaces, soft white text, muted silver, one deep-blue accent. */
+/*
+ * Design tokens, taken from the approved reference: a white header and surfaces on a light grey
+ * page, near-black type, one restrained blue for primary actions, and a near-black admin console.
+ */
 @theme {
-  --color-ink: #0e1014;
-  --color-panel: #161920;
-  --color-raised: #1d2129;
-  --color-line: #2a2f39;
-  --color-silver: #9aa1ad;
-  --color-mist: #eceef2;
-  --color-accent: #3b5bdb;
-  --color-accent-strong: #2f4ac0;
-  --color-danger: #e5484d;
-  --color-success: #3fa97c;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-canvas: #f4f4f4;
+  --color-surface: #ffffff;
+  --color-sunken: #f7f7f8;
+  --color-ink: #171a20;
+  --color-graphite: #393c41;
+  --color-muted: #5c5e62;
+  --color-line: #d0d1d2;
+  --color-hairline: #ececed;
+  --color-accent: #3e6ae1;
+  --color-accent-strong: #3457b1;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+  --color-success: #1d6b45;
+  --color-success-soft: #e7f3ec;
+  --color-warn: #8a5300;
+  --color-warn-soft: #fdf1dc;
+  --color-console: #171a20;
+  --color-console-raised: #2a2d33;
+  --color-console-text: #b3b6bb;
+  --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
   body {
-    @apply bg-ink font-sans text-mist antialiased;
+    @apply bg-canvas font-sans text-ink antialiased;
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-accent;

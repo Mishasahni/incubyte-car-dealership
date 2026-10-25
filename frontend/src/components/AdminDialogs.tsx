@@ -44,12 +44,22 @@ export function RestockDialog({
   return (
     <Modal
       title={`Restock ${vehicle.make} ${vehicle.model}`}
-      description={`Currently ${vehicle.quantity} in stock.`}
+      description={`Currently ${vehicle.quantity} in stock. The units you enter are added to that.`}
       onClose={onClose}
     >
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
         {serverError && <Alert>{serverError}</Alert>}
-        <TextField label="Units to add" type="number" min={1} step={1} inputMode="numeric" value={units} onChange={(event) => setUnits(event.target.value)} error={error ?? undefined} />
+        <TextField
+          label="Units to add"
+          type="number"
+          min={1}
+          step={1}
+          inputMode="numeric"
+          value={units}
+          onChange={(event) => setUnits(event.target.value)}
+          error={error ?? undefined}
+          hint={/^\d+$/.test(units.trim()) && Number(units) >= 1 ? `Stock will be ${vehicle.quantity + Number(units)}.` : 'A whole number of 1 or more.'}
+        />
         <div className="flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel

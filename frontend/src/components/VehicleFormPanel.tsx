@@ -78,10 +78,10 @@ export function VehicleFormPanel({ vehicle, onSave, onClose }: VehicleFormPanelP
         <TextField label="Model" value={values.model} onChange={set('model')} error={errors.model} />
         <TextField label="Category" value={values.category} onChange={set('category')} error={errors.category} hint="For example Sedan, SUV or Truck" />
         <div className="grid grid-cols-2 gap-3">
-          <TextField label="Price" type="number" min={0} step="0.01" inputMode="decimal" value={values.price} onChange={set('price')} error={errors.price} hint="In rupees" />
-          <TextField label="Quantity" type="number" min={0} step={1} inputMode="numeric" value={values.quantity} onChange={set('quantity')} error={errors.quantity} />
+          <TextField label="Price" type="number" min={0} step="0.01" inputMode="decimal" value={values.price} onChange={set('price')} error={errors.price} hint="In rupees, up to 2 decimals" />
+          <TextField label="Quantity" type="number" min={0} step={1} inputMode="numeric" value={values.quantity} onChange={set('quantity')} error={errors.quantity} hint="Whole units, 0 or more" />
         </div>
-        <div className="mt-auto flex justify-end gap-2 border-t border-line pt-4">
+        <div className="mt-auto flex justify-end gap-2 border-t border-hairline pt-5">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
