@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 
 from app.core.security import create_access_token
 from app.models import Vehicle
-from tests.factories import auth_headers, make_user
+from tests.factories import auth_headers, make_user, make_vehicle
 
 LIST_URL = "/api/vehicles"
 
@@ -97,3 +97,19 @@ def test_admin_role_is_read_from_the_database_not_the_token(client, db_session, 
 
     assert response.status_code == 403
     assert count_vehicles(db_session) == 0
+
+
+def test_regular_user_cannot_update_a_vehicle(client, db_session, user_headers):
+    """API-AUTHZ-08(b): updating vehicles is admin-only (our reading of the frontend rules)."""
+    vehicle = make_vehicle(db_session, model="Corolla", quantity=2)
+
+    response = client.put(
+        f"{LIST_URL}/{vehicle.id}",
+        json=NEW_VEHICLE,
+        headers=user_headers,
+    )
+
+    assert response.status_code == 403
+    db_session.expire_all()
+    stored = db_session.get(Vehicle, vehicle.id)
+    assert (stored.model, stored.quantity) == ("Corolla", 2)
