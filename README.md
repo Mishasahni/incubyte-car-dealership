@@ -274,16 +274,19 @@ All screenshots are of the running application against the real backend, with lo
 
 ## Test report
 
-Latest run, 2026-10-25 23:36 IST, at commit `c695385`:
+Latest run, 2026-10-26 00:22 IST, at commit `7d3e352`:
 
 | Suite | Result | Coverage |
 |---|---|---|
 | Backend (pytest against PostgreSQL) | 155 passed | 97% of `app/` and `scripts/` |
 | Frontend (Vitest + React Testing Library) | 50 passed | 90% of lines |
 
-The new tests since the first report cover the role-specific pages and routing, the sign-in and registration redesign, and demo access.
+Ruff is clean, oxlint reports one warning, and the production build succeeds.
 
-**[docs/TEST_REPORT.md](docs/TEST_REPORT.md)** holds the verbatim output of the earlier full run at commit `45eb915` (138 backend and 29 frontend tests), before the frontend redesign. It also has the CT-01 concurrency results over repeated runs, the manual browser checklist, and the tests that weren't written.
+**[docs/TEST_REPORT.md](docs/TEST_REPORT.md)** holds the verbatim output of that run. It also has:
+- the CT-01 concurrency results over repeated runs;
+- the manual browser checks of the redesigned and the first interface;
+- the tests that weren't written.
 
 ## Development approach
 
