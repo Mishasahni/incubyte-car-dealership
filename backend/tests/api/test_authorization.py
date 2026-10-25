@@ -159,3 +159,16 @@ def test_admin_can_use_every_vehicle_and_inventory_endpoint(client, db_session, 
         "restock": 200,
         "delete": 204,
     }
+
+
+def test_regular_user_cannot_restock_a_vehicle(client, db_session, user_headers):
+    """API-AUTHZ-07: restocking is admin-only (stated in the assignment)."""
+    vehicle = make_vehicle(db_session, quantity=2)
+
+    response = client.post(
+        f"{LIST_URL}/{vehicle.id}/restock", json={"quantity": 5}, headers=user_headers
+    )
+
+    assert response.status_code == 403
+    db_session.expire_all()
+    assert db_session.get(Vehicle, vehicle.id).quantity == 2
