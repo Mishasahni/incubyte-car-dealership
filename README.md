@@ -301,7 +301,7 @@ See **[docs/TEST_REPORT.md](docs/TEST_REPORT.md)**. It holds verbatim output fro
 
 ### Reflection
 
-> _To be written in my own words before submission: how AI changed the workflow, what worked, what needed correcting, and what I would do differently._
+Working on this project taught me the importance of breaking a large problem into smaller, testable steps and being precise when communicating requirements. I realised that giving the correct instructions is only part of the process; it is equally important to check each step and verify that the implementation matches what was intended. AI proved to be a valuable accelerator, helping me make progress more efficiently, but I learned not to treat its output as automatically correct. Reviewing code, checking test results, and inspecting the application throughout development were essential. Some of the issues I encountered could have been avoided by paying closer attention to requirements and verifying changes more carefully. Overall, this experience taught me that effective AI-assisted development requires clear instructions, continuous verification, and personal responsibility for the quality of the final product.
 
 ### Evidence
 
