@@ -12,7 +12,12 @@ from tests.factories import auth_headers, make_user, make_vehicle
 LIST_URL = "/api/vehicles"
 
 # Every endpoint that requires a token. Grows as endpoints are added.
-PROTECTED_ENDPOINTS = [("GET", LIST_URL), ("POST", LIST_URL), ("PUT", f"{LIST_URL}/1")]
+PROTECTED_ENDPOINTS = [
+    ("GET", LIST_URL),
+    ("POST", LIST_URL),
+    ("PUT", f"{LIST_URL}/1"),
+    ("DELETE", f"{LIST_URL}/1"),
+]
 
 
 def bearer(token: str) -> dict[str, str]:
