@@ -39,3 +39,11 @@ def update_vehicle(vehicle_id: int, body: VehicleUpdate, session: DbSession) -> 
     except vehicle_service.VehicleNotFoundError as error:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Vehicle not found") from error
     return VehicleResponse.model_validate(vehicle)
+
+
+@router.delete("/{vehicle_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_vehicle(vehicle_id: int, session: DbSession) -> None:
+    try:
+        vehicle_service.delete_vehicle(session, vehicle_id)
+    except vehicle_service.VehicleNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Vehicle not found") from error

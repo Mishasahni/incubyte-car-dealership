@@ -37,3 +37,8 @@ def update_vehicle(session: Session, vehicle_id: int, data: VehicleUpdate) -> Ve
         setattr(vehicle, field, value)
     session.commit()
     return vehicle
+
+
+def delete_vehicle(session: Session, vehicle_id: int) -> None:
+    session.delete(_get_vehicle(session, vehicle_id))
+    session.commit()
