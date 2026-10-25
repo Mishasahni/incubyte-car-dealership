@@ -70,3 +70,11 @@ def test_invalid_update_is_rejected_and_the_vehicle_is_unchanged(
         Decimal("20000.00"),
         2,
     )
+
+
+def test_updating_a_vehicle_that_does_not_exist_returns_404(client, admin_headers):
+    """API-VEH-07"""
+    response = client.put(url(99999), json=UPDATED, headers=admin_headers)
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Vehicle not found"
