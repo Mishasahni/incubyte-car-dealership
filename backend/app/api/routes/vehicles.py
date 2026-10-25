@@ -28,7 +28,11 @@ def create_vehicle(body: VehicleCreate, session: DbSession) -> VehicleResponse:
     return VehicleResponse.model_validate(vehicle_service.create_vehicle(session, body))
 
 
-@router.put("/{vehicle_id}", response_model=VehicleResponse)
+@router.put(
+    "/{vehicle_id}",
+    response_model=VehicleResponse,
+    dependencies=[Depends(require_admin)],
+)
 def update_vehicle(vehicle_id: int, body: VehicleUpdate, session: DbSession) -> VehicleResponse:
     try:
         vehicle = vehicle_service.update_vehicle(session, vehicle_id, body)
