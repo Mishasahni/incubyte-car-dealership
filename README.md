@@ -5,7 +5,9 @@ A full-stack inventory system for a car dealership, built for the Incubyte Softw
 | | |
 |---|---|
 | ![Buyer storefront](docs/screenshots/01-buyer-storefront.jpg) | ![Admin console](docs/screenshots/06-admin-console.jpg) |
+## Live Demo
 
+[Open the Car Dealership Inventory System](https://incubyte-car-dealership-amber.vercel.app)
 ## Contents
 
 - [Features](#features)
