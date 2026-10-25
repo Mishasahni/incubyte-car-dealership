@@ -76,7 +76,11 @@ def purchase_vehicle(vehicle_id: int, session: DbSession) -> VehicleResponse:
     return VehicleResponse.model_validate(vehicle)
 
 
-@router.post("/{vehicle_id}/restock", response_model=VehicleResponse)
+@router.post(
+    "/{vehicle_id}/restock",
+    response_model=VehicleResponse,
+    dependencies=[Depends(require_admin)],
+)
 def restock_vehicle(vehicle_id: int, body: RestockRequest, session: DbSession) -> VehicleResponse:
     try:
         vehicle = inventory_service.restock(session, vehicle_id, body.quantity)
