@@ -1,15 +1,38 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { ApiError } from '../api/client'
-import { listVehicles, purchaseVehicle, searchVehicles, type SearchFilters, type Vehicle } from '../api/vehicles'
+import {
+  createVehicle,
+  deleteVehicle,
+  listVehicles,
+  purchaseVehicle,
+  restockVehicle,
+  searchVehicles,
+  updateVehicle,
+  type SearchFilters,
+  type Vehicle,
+  type VehicleInput,
+} from '../api/vehicles'
 import { useAuth } from '../auth/AuthContext'
+import { ConfirmDeleteDialog, RestockDialog } from '../components/AdminDialogs'
 import { AppHeader } from '../components/AppHeader'
 import { FilterBar } from '../components/FilterBar'
-import { InventoryTable } from '../components/InventoryTable'
+import { InventoryTable, type RowActions } from '../components/InventoryTable'
+import { VehicleFormPanel } from '../components/VehicleFormPanel'
 import { Alert, Button } from '../components/ui'
 import { plural } from '../lib/format'
 
 type Load = { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; vehicles: Vehicle[] }
+
+/** Which admin panel or dialog is open, if any. */
+type AdminTask =
+  | { kind: 'add' }
+  | { kind: 'edit'; vehicle: Vehicle }
+  | { kind: 'restock'; vehicle: Vehicle }
+  | { kind: 'delete'; vehicle: Vehicle }
+  | null
+
+const nameOf = (vehicle: Vehicle) => `${vehicle.make} ${vehicle.model}`
 
 function messageOf(error: unknown): string {
   return error instanceof ApiError ? error.message : 'Something went wrong. Please try again.'
@@ -21,6 +44,7 @@ export function DashboardPage() {
   const [filters, setFilters] = useState<SearchFilters | null>(null)
   const [purchasingId, setPurchasingId] = useState<number | null>(null)
   const [feedback, setFeedback] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
+  const [task, setTask] = useState<AdminTask>(null)
 
   const refresh = useCallback(async (active: SearchFilters | null) => {
     try {
@@ -50,6 +74,40 @@ export function DashboardPage() {
     )
   }
 
+  function updateList(change: (vehicles: Vehicle[]) => Vehicle[]) {
+    setLoad((current) => (current.status === 'ready' ? { ...current, vehicles: change(current.vehicles) } : current))
+  }
+
+  /** Runs an admin change; errors propagate so the open panel or dialog can show them. */
+  async function completeTask(action: () => Promise<void>, message: string) {
+    await action()
+    setTask(null)
+    setFeedback({ tone: 'success', text: message })
+  }
+
+  async function handleSave(input: VehicleInput) {
+    if (task?.kind === 'edit') {
+      const saved = await updateVehicle(task.vehicle.id, input)
+      await completeTask(async () => replaceVehicle(saved), `Saved ${nameOf(saved)}`)
+    } else {
+      const created = await createVehicle(input)
+      await completeTask(async () => updateList((vehicles) => [...vehicles, created]), `Added ${nameOf(created)}`)
+    }
+  }
+
+  async function handleRestock(vehicle: Vehicle, units: number) {
+    const restocked = await restockVehicle(vehicle.id, units)
+    await completeTask(async () => replaceVehicle(restocked), `Restocked ${nameOf(vehicle)}`)
+  }
+
+  async function handleDelete(vehicle: Vehicle) {
+    await deleteVehicle(vehicle.id)
+    await completeTask(
+      async () => updateList((vehicles) => vehicles.filter((v) => v.id !== vehicle.id)),
+      `Deleted ${nameOf(vehicle)}`,
+    )
+  }
+
   async function handlePurchase(vehicle: Vehicle) {
     setPurchasingId(vehicle.id)
     setFeedback(null)
@@ -67,9 +125,12 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen">
       <AppHeader />
-      <div className="mx-auto max-w-7xl px-4 pt-8 pb-6 sm:px-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Inventory</h1>
-        <Summary load={load} searching={filters !== null} />
+      <div className="mx-auto flex max-w-7xl items-end justify-between gap-4 px-4 pt-8 pb-6 sm:px-6">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Inventory</h1>
+          <Summary load={load} searching={filters !== null} />
+        </div>
+        {isAdmin && <Button onClick={() => setTask({ kind: 'add' })}>Add vehicle</Button>}
       </div>
       <FilterBar onSearch={applyFilters} onClear={() => applyFilters(null)} />
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
@@ -81,12 +142,35 @@ export function DashboardPage() {
         <Results
           load={load}
           searching={filters !== null}
-          isAdmin={isAdmin}
-          purchasingId={purchasingId}
-          onPurchase={handlePurchase}
           onRetry={() => applyFilters(filters)}
+          actions={{
+            isAdmin,
+            purchasingId,
+            onPurchase: handlePurchase,
+            onEdit: (vehicle) => setTask({ kind: 'edit', vehicle }),
+            onRestock: (vehicle) => setTask({ kind: 'restock', vehicle }),
+            onDelete: (vehicle) => setTask({ kind: 'delete', vehicle }),
+          }}
         />
       </main>
+      {isAdmin && task && (task.kind === 'add' || task.kind === 'edit') && (
+        <VehicleFormPanel
+          key={task.kind === 'edit' ? task.vehicle.id : 'new'}
+          vehicle={task.kind === 'edit' ? task.vehicle : undefined}
+          onSave={handleSave}
+          onClose={() => setTask(null)}
+        />
+      )}
+      {isAdmin && task?.kind === 'restock' && (
+        <RestockDialog
+          vehicle={task.vehicle}
+          onRestock={(units) => handleRestock(task.vehicle, units)}
+          onClose={() => setTask(null)}
+        />
+      )}
+      {isAdmin && task?.kind === 'delete' && (
+        <ConfirmDeleteDialog vehicle={task.vehicle} onConfirm={() => handleDelete(task.vehicle)} onClose={() => setTask(null)} />
+      )}
     </div>
   )
 }
@@ -103,13 +187,11 @@ function Summary({ load, searching }: { load: Load; searching: boolean }) {
 interface ResultsProps {
   load: Load
   searching: boolean
-  isAdmin: boolean
-  purchasingId: number | null
-  onPurchase: (vehicle: Vehicle) => void
   onRetry: () => void
+  actions: RowActions
 }
 
-function Results({ load, searching, isAdmin, purchasingId, onPurchase, onRetry }: ResultsProps) {
+function Results({ load, searching, onRetry, actions }: ResultsProps) {
   if (load.status === 'loading') {
     return (
       <div aria-busy="true" className="space-y-px">
@@ -137,5 +219,5 @@ function Results({ load, searching, isAdmin, purchasingId, onPurchase, onRetry }
       </p>
     )
   }
-  return <InventoryTable vehicles={load.vehicles} isAdmin={isAdmin} purchasingId={purchasingId} onPurchase={onPurchase} />
+  return <InventoryTable vehicles={load.vehicles} {...actions} />
 }
