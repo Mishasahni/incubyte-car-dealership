@@ -1,9 +1,12 @@
 import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'ghost' | 'danger'
 
 const BUTTON_STYLES: Record<ButtonVariant, string> = {
   primary: 'bg-accent text-white hover:bg-accent-strong disabled:bg-raised disabled:text-silver',
+  // Repeated row actions use the accent as an outline so the page keeps one strong action.
+  outline:
+    'border border-accent/60 text-mist hover:border-accent hover:bg-accent hover:text-white disabled:border-line disabled:bg-transparent disabled:text-silver',
   secondary: 'border border-line bg-raised text-mist hover:border-silver/60 disabled:text-silver/60',
   ghost: 'text-silver hover:text-mist disabled:text-silver/50',
   danger: 'bg-danger text-white hover:bg-danger/85 disabled:bg-raised disabled:text-silver',

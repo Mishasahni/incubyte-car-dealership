@@ -89,6 +89,7 @@ function VehicleRow({ vehicle, onPurchase, purchasingId, isAdmin, onEdit, onRest
             </>
           )}
           <Button
+            variant="outline"
             className="ml-1 h-9 min-w-28"
             aria-label={`Purchase ${name}`}
             disabled={vehicle.quantity === 0 || purchasing}
