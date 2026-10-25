@@ -40,7 +40,7 @@ describe('Register page', () => {
 
     expect(register).toHaveBeenCalledWith('buyer@dealership.com', 'Secr3t-pass')
     expect(login).toHaveBeenCalledWith('buyer@dealership.com', 'Secr3t-pass')
-    expect(await screen.findByRole('heading', { name: 'Inventory' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Find your next car' })).toBeInTheDocument()
   })
 
   it('FE-AUTH-07: shows that the email is already registered', async () => {

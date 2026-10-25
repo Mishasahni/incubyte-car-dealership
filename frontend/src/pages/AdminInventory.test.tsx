@@ -19,11 +19,14 @@ vi.mock('../api/vehicles')
 
 const COROLLA: Vehicle = { id: 1, make: 'Toyota', model: 'Corolla', category: 'Sedan', price: 20000, quantity: 2 }
 
+const RAV4: Vehicle = { id: 2, make: 'Toyota', model: 'RAV4', category: 'SUV', price: 30000, quantity: 0 }
+const CIVIC: Vehicle = { id: 3, make: 'Honda', model: 'Civic', category: 'Sedan', price: 25000, quantity: 1 }
+
 async function openInventoryAs(user: User, vehicles: Vehicle[] = [COROLLA]) {
   vi.mocked(listVehicles).mockResolvedValue(vehicles)
   signInAs(user)
   renderApp('/')
-  await screen.findByRole('row', { name: /Toyota Corolla/ })
+  await screen.findByRole('button', { name: `Purchase ${vehicles[0].make} ${vehicles[0].model}` })
 }
 
 async function fill(dialog: HTMLElement, fields: Record<string, string>) {
@@ -51,6 +54,29 @@ describe('Admin controls', () => {
     expect(screen.getByRole('button', { name: 'Edit Toyota Corolla' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Restock Toyota Corolla' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Delete Toyota Corolla' })).toBeInTheDocument()
+    expect(screen.getByRole('row', { name: /Toyota Corolla/ })).toHaveTextContent('₹20,000.00')
+  })
+
+  it('FE-ADM-09: the summary strip counts vehicles, units and sold-out vehicles from the inventory', async () => {
+    await openInventoryAs(ADMIN, [COROLLA, RAV4, CIVIC])
+    const summary = screen.getByRole('region', { name: 'Stock summary' })
+
+    expect(within(summary).getByText('Vehicles').parentElement).toHaveTextContent('3')
+    expect(within(summary).getByText('Units in stock').parentElement).toHaveTextContent('3')
+    expect(within(summary).getByText('Out of stock').parentElement).toHaveTextContent('1')
+  })
+
+  it('FE-ADM-10: Stock attention lists only vehicles with one unit or none', async () => {
+    await openInventoryAs(ADMIN, [COROLLA, RAV4, CIVIC])
+
+    await userEvent.setup().click(
+      within(screen.getByRole('navigation', { name: 'Admin' })).getByRole('button', { name: /Stock attention/ }),
+    )
+
+    expect(screen.getByRole('heading', { name: 'Stock attention' })).toBeInTheDocument()
+    expect(screen.getByRole('row', { name: /Toyota RAV4/ })).toBeInTheDocument()
+    expect(screen.getByRole('row', { name: /Honda Civic/ })).toBeInTheDocument()
+    expect(screen.queryByRole('row', { name: /Toyota Corolla/ })).not.toBeInTheDocument()
   })
 })
 

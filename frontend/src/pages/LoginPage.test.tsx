@@ -43,7 +43,7 @@ describe('Login page', () => {
     await submitLogin('buyer@dealership.com', 'Secr3t-pass')
 
     expect(login).toHaveBeenCalledWith('buyer@dealership.com', 'Secr3t-pass')
-    expect(await screen.findByRole('heading', { name: 'Inventory' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Find your next car' })).toBeInTheDocument()
     expect(loadSession()).toEqual({ token: 'jwt', user: BUYER })
   })
 

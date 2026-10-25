@@ -18,8 +18,8 @@ function openInventory(vehicles: Vehicle[]) {
   renderApp('/')
 }
 
-function row(name: string) {
-  return screen.getByRole('row', { name: new RegExp(name) })
+function card(name: string) {
+  return screen.getByRole('article', { name })
 }
 
 describe('Inventory', () => {
@@ -27,12 +27,14 @@ describe('Inventory', () => {
     openInventory([COROLLA, RAV4])
 
     expect(screen.getByText('Loading inventory…')).toBeInTheDocument()
-    const corolla = await screen.findByRole('row', { name: /Toyota Corolla/ })
+    const corolla = await screen.findByRole('article', { name: 'Toyota Corolla' })
     expect(corolla).toHaveTextContent('Sedan')
     expect(corolla).toHaveTextContent('₹20,000.00')
     expect(corolla).toHaveTextContent('2 in stock')
-    expect(row('Toyota RAV4')).toHaveTextContent('Out of stock')
-    expect(screen.getByText('2 vehicles · 1 out of stock')).toBeInTheDocument()
+    expect(card('Toyota RAV4')).toHaveTextContent('Out of stock')
+    expect(screen.getByText('2 vehicles · 1 available')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Find your next car' })).toBeInTheDocument()
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 
   it('FE-VEH-02: says so when the inventory is empty', async () => {
@@ -43,7 +45,7 @@ describe('Inventory', () => {
 
   it('FE-VEH-04 and FE-VEH-05: Purchase is enabled in stock and disabled at zero', async () => {
     openInventory([COROLLA, RAV4])
-    await screen.findByRole('row', { name: /Toyota Corolla/ })
+    await screen.findByRole('article', { name: 'Toyota Corolla' })
 
     expect(screen.getByRole('button', { name: 'Purchase Toyota Corolla' })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Purchase Toyota RAV4' })).toBeDisabled()
@@ -59,7 +61,7 @@ describe('Inventory', () => {
     expect(purchaseVehicle).toHaveBeenCalledTimes(1)
     expect(purchaseVehicle).toHaveBeenCalledWith(1)
     expect(await screen.findByText('Purchased 1 × Toyota Corolla')).toBeInTheDocument()
-    expect(row('Toyota Corolla')).toHaveTextContent('1 left')
+    expect(card('Toyota Corolla')).toHaveTextContent('1 left')
   })
 
   it('FE-VEH-07: buying the last unit disables Purchase', async () => {
@@ -75,7 +77,7 @@ describe('Inventory', () => {
   it('FE-VEH-08: a sold-out conflict shows the message and reloads the stock', async () => {
     vi.mocked(purchaseVehicle).mockRejectedValue(new ApiError(409, 'Vehicle is out of stock'))
     openInventory([{ ...COROLLA, quantity: 1 }])
-    await screen.findByRole('row', { name: /Toyota Corolla/ })
+    await screen.findByRole('article', { name: 'Toyota Corolla' })
     vi.mocked(listVehicles).mockResolvedValue([{ ...COROLLA, quantity: 0 }])
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Purchase Toyota Corolla' }))
@@ -89,7 +91,8 @@ describe('Search and filter', () => {
   async function search(fields: Record<string, string>) {
     const user = userEvent.setup()
     for (const [label, value] of Object.entries(fields)) {
-      await user.type(screen.getByLabelText(label), value)
+      if (label === 'Category') await user.selectOptions(screen.getByLabelText(label), value)
+      else await user.type(screen.getByLabelText(label), value)
     }
     await user.click(screen.getByRole('button', { name: 'Search' }))
   }
@@ -97,25 +100,25 @@ describe('Search and filter', () => {
   it('FE-SRCH-01: sends every filled filter and shows the results', async () => {
     vi.mocked(searchVehicles).mockResolvedValue([COROLLA])
     openInventory([COROLLA, RAV4])
-    await screen.findByRole('row', { name: /Toyota RAV4/ })
+    await screen.findByRole('article', { name: 'Toyota RAV4' })
 
-    await search({ Make: 'toy', Model: 'cor', Category: 'sedan', 'Min price': '15000', 'Max price': '25000' })
+    await search({ Make: 'toy', Model: 'cor', Category: 'Sedan', 'Min price': '15000', 'Max price': '25000' })
 
     expect(searchVehicles).toHaveBeenCalledWith({
       make: 'toy',
       model: 'cor',
-      category: 'sedan',
+      category: 'Sedan',
       min_price: '15000',
       max_price: '25000',
     })
     expect(await screen.findByText('1 result')).toBeInTheDocument()
-    expect(screen.queryByRole('row', { name: /Toyota RAV4/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('article', { name: 'Toyota RAV4' })).not.toBeInTheDocument()
   })
 
   it('FE-SRCH-02: leaves out empty filters', async () => {
     vi.mocked(searchVehicles).mockResolvedValue([COROLLA, RAV4])
     openInventory([COROLLA, RAV4])
-    await screen.findByRole('row', { name: /Toyota RAV4/ })
+    await screen.findByRole('article', { name: 'Toyota RAV4' })
 
     await search({ Make: 'toy' })
 
@@ -124,7 +127,7 @@ describe('Search and filter', () => {
 
   it('FE-SRCH-03: rejects a minimum above the maximum without searching', async () => {
     openInventory([COROLLA])
-    await screen.findByRole('row', { name: /Toyota Corolla/ })
+    await screen.findByRole('article', { name: 'Toyota Corolla' })
 
     await search({ 'Min price': '30000', 'Max price': '10000' })
 
@@ -132,17 +135,37 @@ describe('Search and filter', () => {
     expect(searchVehicles).not.toHaveBeenCalled()
   })
 
-  it('FE-SRCH-04 and FE-SRCH-05: shows no matches, and Clear restores the full list', async () => {
+  it('FE-SRCH-04 and FE-SRCH-05: shows no matches, and Reset restores the full list', async () => {
     vi.mocked(searchVehicles).mockResolvedValue([])
     openInventory([COROLLA, RAV4])
-    await screen.findByRole('row', { name: /Toyota RAV4/ })
+    await screen.findByRole('article', { name: 'Toyota RAV4' })
     await search({ Make: 'tesla' })
     expect(await screen.findByText('No vehicles match these filters.')).toBeInTheDocument()
 
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Clear' }))
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Reset' }))
 
-    expect(await screen.findByRole('row', { name: /Toyota RAV4/ })).toBeInTheDocument()
+    expect(await screen.findByRole('article', { name: 'Toyota RAV4' })).toBeInTheDocument()
     expect(screen.getByLabelText('Make')).toHaveValue('')
-    expect(within(screen.getByRole('table')).getAllByRole('row')).toHaveLength(3)
+    expect(within(screen.getByRole('list', { name: 'Vehicles' })).getAllByRole('article')).toHaveLength(2)
+  })
+
+  it('FE-SRCH-06: offers only the categories in the inventory', async () => {
+    openInventory([COROLLA, RAV4])
+    await screen.findByRole('article', { name: 'Toyota RAV4' })
+
+    const options = within(screen.getByLabelText('Category')).getAllByRole('option')
+    expect(options.map((option) => option.textContent)).toEqual(['All categories', 'Sedan', 'SUV'])
+  })
+
+  it('FE-SRCH-07: "In stock only" hides sold-out vehicles without another request', async () => {
+    openInventory([COROLLA, RAV4])
+    await screen.findByRole('article', { name: 'Toyota RAV4' })
+
+    await userEvent.setup().click(screen.getByRole('radio', { name: 'In stock only' }))
+
+    expect(screen.queryByRole('article', { name: 'Toyota RAV4' })).not.toBeInTheDocument()
+    expect(screen.getByRole('article', { name: 'Toyota Corolla' })).toBeInTheDocument()
+    expect(searchVehicles).not.toHaveBeenCalled()
+    expect(listVehicles).toHaveBeenCalledTimes(1)
   })
 })
