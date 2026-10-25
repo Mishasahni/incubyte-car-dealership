@@ -19,6 +19,7 @@ PROTECTED_ENDPOINTS = [
     ("DELETE", f"{LIST_URL}/1"),
     ("GET", f"{LIST_URL}/search"),
     ("POST", f"{LIST_URL}/1/purchase"),
+    ("POST", f"{LIST_URL}/1/restock"),
 ]
 
 
@@ -130,3 +131,31 @@ def test_regular_user_cannot_delete_a_vehicle(client, db_session, user_headers):
 
     assert response.status_code == 403
     assert count_vehicles(db_session) == 1
+
+
+def test_admin_can_use_every_vehicle_and_inventory_endpoint(client, db_session, admin_headers):
+    """API-AUTHZ-09: each call returns its success code from REQUIREMENTS section 2."""
+    vehicle = make_vehicle(db_session, quantity=1)
+    vehicle_url = f"{LIST_URL}/{vehicle.id}"
+
+    status_codes = {
+        "list": client.get(LIST_URL, headers=admin_headers).status_code,
+        "search": client.get(f"{LIST_URL}/search", headers=admin_headers).status_code,
+        "create": client.post(LIST_URL, json=NEW_VEHICLE, headers=admin_headers).status_code,
+        "update": client.put(vehicle_url, json=NEW_VEHICLE, headers=admin_headers).status_code,
+        "purchase": client.post(f"{vehicle_url}/purchase", headers=admin_headers).status_code,
+        "restock": client.post(
+            f"{vehicle_url}/restock", json={"quantity": 2}, headers=admin_headers
+        ).status_code,
+        "delete": client.delete(vehicle_url, headers=admin_headers).status_code,
+    }
+
+    assert status_codes == {
+        "list": 200,
+        "search": 200,
+        "create": 201,
+        "update": 200,
+        "purchase": 200,
+        "restock": 200,
+        "delete": 204,
+    }
