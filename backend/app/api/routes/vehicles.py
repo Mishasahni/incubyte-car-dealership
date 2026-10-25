@@ -41,7 +41,11 @@ def update_vehicle(vehicle_id: int, body: VehicleUpdate, session: DbSession) -> 
     return VehicleResponse.model_validate(vehicle)
 
 
-@router.delete("/{vehicle_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{vehicle_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
 def delete_vehicle(vehicle_id: int, session: DbSession) -> None:
     try:
         vehicle_service.delete_vehicle(session, vehicle_id)
