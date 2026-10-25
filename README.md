@@ -350,4 +350,8 @@ Working on this project taught me the importance of breaking a large problem int
 
 ### Evidence
 
-[`PROMPTS.md`](PROMPTS.md) links the raw, unedited exports of every Claude Code session used for this project, in [`prompts/`](prompts/). The ChatGPT conversations aren't included there; this section describes what ChatGPT was used for.
+[`PROMPTS.md`](PROMPTS.md) is the readable record of the AI-assisted work.
+- It lists every Claude Code session used for this project, with the key prompts quoted verbatim and grouped by stage.
+- It links the raw, unedited session exports in [`prompts/`](prompts/).
+- Passwords of local test accounts that appear in those logs no longer work; `PROMPTS.md` explains this.
+- The ChatGPT conversations aren't included; this section describes what ChatGPT was used for.
