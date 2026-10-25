@@ -206,7 +206,11 @@ See **[docs/TEST_REPORT.md](docs/TEST_REPORT.md)**. It holds verbatim output fro
 
 ## Development approach
 
-- **Test-driven development.** Each behaviour started with a failing test that was run and seen failing for the intended reason, then committed (`test: …`). Next came the smallest implementation that passed (`feat:` or `fix: …`), with refactors committed separately.
+- **Test-driven development.** Each behaviour started with a failing test that was run and seen failing for the intended reason, then committed (`test: …`). Next came the smallest implementation that passed (`feat:` or `fix: …`).
+- **Refactoring.** Most refactoring happened inside green commits, and their messages say so. For example, `feat: add POST /api/auth/login…` moves shared dependencies into `api/deps.py`, and `feat: return 404 when updating…` extracts the `_get_vehicle` lookup that delete, purchase and restock later reuse. There are two separate `refactor:` commits, each made with the full suite passing before and after:
+  - sharing the auth-header fixtures across the API tests (during M5);
+  - a final pass after the features were finished, mapping service errors to 404 and 409 in one place instead of in each route.
+- **Frontend cycles are coarse.** Each frontend milestone is one failing-test commit and one implementation commit, so refactoring there can't be seen separately in the history.
 - **The commit messages record what was actually observed.** That includes cases where a test passed on its first run (committed as characterization tests) and a concurrency test whose first version failed only 11 of 20 runs before its harness was fixed.
 - **Frontend tests** mock the API module and check what the user sees, using accessible roles and labels.
 - **Commits** follow a `type: summary` convention, and every AI-assisted commit ends with a `Co-authored-by` trailer after two empty lines, as the assignment requires.
