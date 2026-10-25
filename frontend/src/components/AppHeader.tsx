@@ -15,7 +15,7 @@ export function AppHeader() {
               Admin
             </span>
           )}
-          <Button variant="ghost" className="px-2" onClick={signOut}>
+          <Button variant="ghost" className="px-2 whitespace-nowrap" onClick={signOut}>
             Log out
           </Button>
         </div>

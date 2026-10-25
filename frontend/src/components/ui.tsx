@@ -74,7 +74,7 @@ export function Alert({ tone = 'error', children }: { tone?: 'error' | 'success'
 
 export function Wordmark() {
   return (
-    <span className="text-sm font-semibold tracking-[0.18em] text-mist uppercase">
+    <span className="text-xs font-semibold tracking-[0.14em] whitespace-nowrap text-mist uppercase sm:text-sm sm:tracking-[0.18em]">
       Dealership <span className="text-silver">Inventory</span>
     </span>
   )
