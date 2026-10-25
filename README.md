@@ -1,8 +1,10 @@
 # Car Dealership Inventory System
 
-A full-stack inventory system for a car dealership, built for the Incubyte Software Craftsperson TDD kata. Staff and customers sign in, browse and search the vehicle inventory, and purchase vehicles; administrators add, edit, restock and delete vehicles. Stock changes are safe under concurrent purchases, and all data is stored in PostgreSQL.
+A full-stack inventory system for a car dealership, built for the Incubyte Software Craftsperson TDD kata. Buyers sign in to a storefront where they browse, search and purchase vehicles; administrators get a separate inventory management console where they add, edit, restock and delete vehicles. Stock changes are safe under concurrent purchases, and all data is stored in PostgreSQL.
 
-![Admin inventory view](docs/screenshots/06-inventory-admin-desktop.png)
+| | |
+|---|---|
+| ![Buyer storefront](docs/screenshots/01-buyer-storefront.jpg) | ![Admin console](docs/screenshots/06-admin-console.jpg) |
 
 ## Contents
 
@@ -23,12 +25,25 @@ A full-stack inventory system for a car dealership, built for the Incubyte Softw
 ## Features
 
 - **Accounts:** registration and login with JWT bearer tokens. Passwords are stored as Argon2 hashes. Public registration always creates a regular user.
-- **Inventory:** every vehicle with make, model, category, price (₹) and stock, including out-of-stock vehicles.
-- **Search and filter:** by make or model (case-insensitive substring), category (case-insensitive exact match) and an inclusive price range. `%` and `_` are matched literally.
-- **Purchasing:** one unit per purchase. The Purchase button is disabled at zero stock, and the backend refuses out-of-stock purchases with 409.
+- **Sign-in and registration:** a split layout with the Masar Auto artwork beside the form, a password visibility toggle, inline validation, and the backend's 8–128 character password rule shown on registration.
+- **Two role-specific experiences**, chosen from the role the backend returns:
+  - **Buyers** land on the storefront at `/`, "Find your next car".
+  - **Admins** land on the "Inventory Management" console at `/admin`. A buyer who opens `/admin` is sent back to the storefront, and the server still checks the role on every admin request.
+- **Buyer storefront:**
+  - a grid of vehicle cards: 3 columns on wide screens, 2 on tablets, 1 on phones;
+  - each card shows make and model, category, price (₹), a stock indicator ("1 left" in amber, "Out of stock" with a disabled button) and Purchase;
+  - each card has a side-profile illustration of the body style (sedan, SUV, truck or a generic car), chosen from the category. The backend stores no images, so photographs couldn't be matched reliably to every vehicle.
+- **Admin console:**
+  - a dark sidebar with an Admin badge and two views: Inventory, and Stock attention (vehicles with one unit or none);
+  - a summary strip counted from the inventory (vehicles, units in stock, out of stock);
+  - a management table with Purchase, Edit, Restock and Delete on each row.
+  - Add and Edit open a side panel, Restock a dialog that explains the units are added to the current stock, and Delete a confirmation that names the vehicle.
+  - Admin accounts are created only with a command-line script.
+- **Search and filter:** by make or model (case-insensitive substring), category (case-insensitive exact match; a select built from the inventory's categories) and an inclusive price range. `%` and `_` are matched literally. Buyers can also show only vehicles in stock; that filter runs in the browser, because the API has no availability filter.
+- **Purchasing:** one unit per purchase. The Purchase button is disabled at zero stock and while a purchase is in flight, and the backend refuses out-of-stock purchases with 409.
 - **Concurrency safety:** a purchase is a single conditional `UPDATE … WHERE quantity > 0`, so simultaneous buyers can never oversell. A threaded test (CT-01) proves this against PostgreSQL.
-- **Administration:** add and edit vehicles in a side panel, restock in a dialog, and delete after confirmation. Admin accounts are created only with a command-line script.
-- **Responsive UI:** a table on tablet and desktop that becomes stacked rows on phones (375 px), with labelled inputs, visible focus and keyboard-accessible dialogs.
+- **Demo access:** optional one-click Buyer and Admin demos for evaluators, controlled by the server. See [Demo access](#demo-access).
+- **Responsive and accessible:** checked at 375, 768 and 1280 px with no horizontal scrolling, with labelled inputs, visible focus and keyboard-accessible dialogs.
 
 ## Tech stack
 
@@ -36,7 +51,7 @@ A full-stack inventory system for a car dealership, built for the Incubyte Softw
 |---|---|
 | Backend | Python 3.14, FastAPI, SQLAlchemy 2, psycopg 3, Pydantic, PyJWT, pwdlib (Argon2) |
 | Database | PostgreSQL 18 |
-| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, React Router, Figtree (Google Fonts) |
 | Backend tests | pytest, FastAPI TestClient (HTTPX), pytest-cov, ruff |
 | Frontend tests | Vitest, React Testing Library, user-event, jest-dom, v8 coverage, oxlint |
 
@@ -49,12 +64,13 @@ frontend/  React SPA ── fetch + Bearer token ──►  backend/  FastAPI
                                                    ├─ schemas        request validation, response shapes
                                                    ├─ services       business rules (auth, vehicles, inventory)
                                                    ├─ models         SQLAlchemy tables and CHECK constraints
-                                                   └─ scripts        init_db, create_admin
+                                                   └─ scripts        init_db, create_admin, create_demo_accounts
                                                           │
                                                           ▼
                                                      PostgreSQL
 ```
 
+- **Frontend routes:** `/login` and `/register`; `/`, the buyer storefront (admins are redirected to `/admin`); and `/admin`, the admin console, behind `AdminRoute`. Both inventory pages share one data hook (`useInventory`) and the same design tokens.
 - **Routers** stay thin. **Services** hold the rules and raise domain errors (`VehicleNotFoundError`, `OutOfStockError`, `DuplicateEmailError`).
 - The role is read from the database on every request, so demoting an admin takes effect immediately.
 - **The database is the final safeguard:** `CHECK (quantity >= 0)`, `CHECK (price > 0)` and a unique email.
@@ -229,24 +245,45 @@ All `/api/vehicles` endpoints need `Authorization: Bearer <token>`. Errors use F
 
 ## Screenshots
 
-All screenshots are of the running application with local demo data.
+All screenshots are of the running application against the real backend, with local demo data, captured in the browser at 1280 px unless noted. They are the browser's scaled-down captures, not full resolution.
+
+**Sign-in and registration**
 
 | | |
 |---|---|
-| ![Sign in](docs/screenshots/01-sign-in.png) Sign in | ![Registration validation](docs/screenshots/02-register-validation.png) Registration validation |
-| ![Buyer inventory](docs/screenshots/03-inventory-buyer-desktop.png) Regular user's inventory | ![Search results](docs/screenshots/04-search-results.png) Search by category and price |
-| ![Purchase confirmed](docs/screenshots/05-purchase-confirmed.png) Purchase confirmed | ![Admin inventory](docs/screenshots/06-inventory-admin-desktop.png) Admin inventory |
-| ![Add vehicle panel](docs/screenshots/07-admin-add-vehicle-panel.png) Add vehicle panel | ![Delete confirmation](docs/screenshots/08-admin-delete-confirmation.png) Delete confirmation |
-| ![Tablet](docs/screenshots/09-inventory-admin-tablet.png) Tablet, 768 px | ![Phone](docs/screenshots/10-inventory-phone.png) Phone, 375 px |
+| ![Sign in](docs/screenshots/11-login-desktop.jpg) Sign in | ![Create account](docs/screenshots/12-register-desktop.jpg) Create account |
+| ![Registration on a tablet](docs/screenshots/13-register-tablet.jpg) Registration, 768 px | ![Sign in on a phone](docs/screenshots/14-login-phone.jpg) Sign in, 375 px |
+| ![Demo entry](docs/screenshots/15-login-demo-entry.jpg) Sign in with demo access on | ![Demo dialog](docs/screenshots/16-demo-dialog.jpg) Explore the demo |
+
+**Buyer storefront**
+
+| | |
+|---|---|
+| ![Storefront](docs/screenshots/01-buyer-storefront.jpg) Storefront | ![Search results](docs/screenshots/02-buyer-search-results.jpg) Search: SUVs from ₹15,00,000 |
+| ![Purchase confirmed](docs/screenshots/03-buyer-purchase-confirmed.jpg) Purchase confirmed | ![Tablet](docs/screenshots/04-buyer-tablet.jpg) Tablet, 768 px |
+| ![Phone](docs/screenshots/05-buyer-phone.jpg) Phone, 375 px | |
+
+**Admin console**
+
+| | |
+|---|---|
+| ![Admin console](docs/screenshots/06-admin-console.jpg) Inventory Management | ![Add vehicle](docs/screenshots/07-admin-add-vehicle-panel.jpg) Add vehicle panel |
+| ![Restock](docs/screenshots/08-admin-restock-dialog.jpg) Restock dialog | ![Delete confirmation](docs/screenshots/09-admin-delete-confirmation.jpg) Delete confirmation |
+| ![Stock attention](docs/screenshots/10-admin-stock-attention.jpg) Stock attention | ![Admin on a phone](docs/screenshots/17-admin-phone.jpg) Phone, 375 px |
+| ![Admin rows on a phone](docs/screenshots/18-admin-phone-rows.jpg) Stacked rows on a phone | |
 
 ## Test report
 
-See **[docs/TEST_REPORT.md](docs/TEST_REPORT.md)**. It holds verbatim output from the final runs, the CT-01 concurrency results over repeated runs, the manual browser checklist, and the tests that weren't written.
+Latest run, 2026-10-25 23:36 IST, at commit `c695385`:
 
 | Suite | Result | Coverage |
 |---|---|---|
-| Backend (pytest against PostgreSQL) | 138 passed | 97% |
-| Frontend (Vitest) | 29 passed | 88% of lines |
+| Backend (pytest against PostgreSQL) | 155 passed | 97% of `app/` and `scripts/` |
+| Frontend (Vitest + React Testing Library) | 50 passed | 90% of lines |
+
+The new tests since the first report cover the role-specific pages and routing, the sign-in and registration redesign, and demo access.
+
+**[docs/TEST_REPORT.md](docs/TEST_REPORT.md)** holds the verbatim output of the earlier full run at commit `45eb915` (138 backend and 29 frontend tests), before the frontend redesign. It also has the CT-01 concurrency results over repeated runs, the manual browser checklist, and the tests that weren't written.
 
 ## Development approach
 
@@ -266,7 +303,11 @@ See **[docs/TEST_REPORT.md](docs/TEST_REPORT.md)**. It holds verbatim output fro
 - **Email case.** `A@x.com` and `a@x.com` count as different accounts; the case-insensitivity tests were left as lower priority.
 - **Restock has no upper limit.** A restock large enough to exceed PostgreSQL's `INTEGER` range would fail with a server error.
 - **No purchase history.** A purchase only decrements stock.
-- **One lint warning.** The frontend's load-on-open effect triggers one oxlint warning (`set-state-in-effect`).
+- **One lint warning.** The inventory's load-on-open effect (`useInventory`) triggers one oxlint warning (`set-state-in-effect`).
+- **Vehicle images are illustrations.** Cards show a drawing of the body style, not a photograph of the vehicle.
+- **Two brand names.** Sign-in and registration use the Masar Auto branding, while the inventory pages still show the earlier "DEALERSHIP" wordmark.
+- **Third-party artwork.** The Masar Auto image on the sign-in pages is a brand concept credited in the image to its designer (Shaghaf).
+- **Web font.** Figtree loads from Google Fonts; without network access the pages fall back to the system font.
 - **Not covered by automated tests:**
   - **Lower-priority tests from TEST_PLAN §9:** listed in the test report.
   - **Frontend-to-backend integration:** checked manually in the browser.
@@ -293,7 +334,11 @@ See **[docs/TEST_REPORT.md](docs/TEST_REPORT.md)**. It holds verbatim output fro
   - recovering access to my local PostgreSQL superuser account safely, with a backup and byte-for-byte rollback of `pg_hba.conf`, where I ran every privileged command myself;
   - finding that the assignment's sample co-author email credited an unrelated GitHub user;
   - making the concurrency test fail reliably.
-- **Frontend and verification:** Claude Code built the React UI from a layout I approved. It tested the flows in a browser against the real backend, found and fixed a validation gap and a phone-layout problem, and took the screenshots.
+- **Frontend and verification:**
+  - Claude Code built the first React UI from a layout I approved.
+  - It then redesigned it into a separate buyer storefront and admin console from layouts I approved on a design canvas, and redesigned sign-in and registration around the Masar Auto artwork I supplied.
+  - It added the server-controlled demo access I specified.
+  - Each time, it tested the flows in a browser against the real backend, fixed the problems it found (such as a validation gap, misaligned cards and a cropped image), and took the screenshots.
 - **Prompting and review:** I used ChatGPT to help turn my goals into staged instructions for Claude Code, with explicit stop points for approval. I also used it to clarify concepts and to review parts of the workflow.
 - **Git:**
   - every AI-assisted commit names Claude Code as co-author;
