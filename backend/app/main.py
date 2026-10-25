@@ -26,4 +26,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.include_router(auth.router)
     app.include_router(vehicles.router)
+    vehicles.add_error_handlers(app)
     return app
