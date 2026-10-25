@@ -32,3 +32,17 @@ def purchase(session: Session, vehicle_id: int) -> Vehicle:
         raise OutOfStockError(vehicle_id)
     session.commit()
     return sold
+
+
+def restock(session: Session, vehicle_id: int, units: int) -> Vehicle:
+    """Add ``units`` to a vehicle's stock in one UPDATE, so concurrent purchases are not lost."""
+    restocked = session.scalars(
+        update(Vehicle)
+        .where(Vehicle.id == vehicle_id)
+        .values(quantity=Vehicle.quantity + units)
+        .returning(Vehicle)
+    ).one_or_none()
+    if restocked is None:
+        raise VehicleNotFoundError(vehicle_id)
+    session.commit()
+    return restocked

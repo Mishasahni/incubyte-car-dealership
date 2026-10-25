@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.deps import DbSession, get_current_user, require_admin
+from app.schemas.inventory import RestockRequest
 from app.schemas.vehicle import VehicleCreate, VehicleResponse, VehicleSearch, VehicleUpdate
 from app.services import inventory_service, vehicle_service
 
@@ -72,4 +73,13 @@ def purchase_vehicle(vehicle_id: int, session: DbSession) -> VehicleResponse:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Vehicle not found") from error
     except inventory_service.OutOfStockError as error:
         raise HTTPException(status.HTTP_409_CONFLICT, "Vehicle is out of stock") from error
+    return VehicleResponse.model_validate(vehicle)
+
+
+@router.post("/{vehicle_id}/restock", response_model=VehicleResponse)
+def restock_vehicle(vehicle_id: int, body: RestockRequest, session: DbSession) -> VehicleResponse:
+    try:
+        vehicle = inventory_service.restock(session, vehicle_id, body.quantity)
+    except vehicle_service.VehicleNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Vehicle not found") from error
     return VehicleResponse.model_validate(vehicle)
