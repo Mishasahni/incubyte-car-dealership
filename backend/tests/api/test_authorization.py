@@ -18,6 +18,7 @@ PROTECTED_ENDPOINTS = [
     ("PUT", f"{LIST_URL}/1"),
     ("DELETE", f"{LIST_URL}/1"),
     ("GET", f"{LIST_URL}/search"),
+    ("POST", f"{LIST_URL}/1/purchase"),
 ]
 
 
