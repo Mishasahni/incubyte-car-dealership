@@ -118,3 +118,13 @@ def test_regular_user_cannot_update_a_vehicle(client, db_session, user_headers):
     db_session.expire_all()
     stored = db_session.get(Vehicle, vehicle.id)
     assert (stored.model, stored.quantity) == ("Corolla", 2)
+
+
+def test_regular_user_cannot_delete_a_vehicle(client, db_session, user_headers):
+    """API-AUTHZ-06: deleting vehicles is admin-only (stated in the assignment)."""
+    vehicle = make_vehicle(db_session)
+
+    response = client.delete(f"{LIST_URL}/{vehicle.id}", headers=user_headers)
+
+    assert response.status_code == 403
+    assert count_vehicles(db_session) == 1
