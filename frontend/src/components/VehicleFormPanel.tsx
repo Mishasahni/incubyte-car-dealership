@@ -9,6 +9,8 @@ type Field = 'make' | 'model' | 'category' | 'price' | 'quantity'
 type Values = Record<Field, string>
 type Errors = Partial<Record<Field, string>>
 
+const MAX_PRICE = 10_000_000_000
+
 /** Same rules as the backend's VehicleCreate schema, for immediate feedback. */
 function validate(values: Values): Errors {
   const errors: Errors = {}
@@ -18,6 +20,8 @@ function validate(values: Values): Errors {
   const price = Number(values.price)
   if (!values.price || !(price > 0)) errors.price = 'Enter a price above 0'
   else if (!/^\d+(\.\d{1,2})?$/.test(values.price.trim())) errors.price = 'Use at most 2 decimal places'
+  // The backend stores NUMERIC(12,2): at most 10 digits before the decimal point.
+  else if (price >= MAX_PRICE) errors.price = 'Price must be below ₹10,00,00,00,000'
   if (!/^\d+$/.test(values.quantity.trim())) errors.quantity = 'Enter a whole number of 0 or more'
   return errors
 }
