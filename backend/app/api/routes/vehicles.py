@@ -1,6 +1,6 @@
 """Vehicle endpoints. Every route here requires a valid bearer token."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.deps import DbSession, get_current_user, require_admin
 from app.schemas.vehicle import VehicleCreate, VehicleResponse, VehicleUpdate
@@ -30,4 +30,8 @@ def create_vehicle(body: VehicleCreate, session: DbSession) -> VehicleResponse:
 
 @router.put("/{vehicle_id}", response_model=VehicleResponse)
 def update_vehicle(vehicle_id: int, body: VehicleUpdate, session: DbSession) -> VehicleResponse:
-    return VehicleResponse.model_validate(vehicle_service.update_vehicle(session, vehicle_id, body))
+    try:
+        vehicle = vehicle_service.update_vehicle(session, vehicle_id, body)
+    except vehicle_service.VehicleNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Vehicle not found") from error
+    return VehicleResponse.model_validate(vehicle)
