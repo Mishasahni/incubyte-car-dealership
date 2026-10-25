@@ -10,9 +10,10 @@ export function RegisterPage() {
 
   return (
     <AuthForm
-      title="Create account"
-      subtitle="Register to browse and purchase vehicles."
+      title="Create your account"
+      subtitle="Register to browse the vehicle inventory and buy vehicles. New accounts are buyer accounts."
       submitLabel="Create account"
+      pendingLabel="Creating account…"
       enforcePasswordPolicy
       onSubmit={async (email, password) => {
         await signUp(email, password)
@@ -20,7 +21,7 @@ export function RegisterPage() {
       }}
       footer={
         <>
-          Already registered?{' '}
+          Already have an account?{' '}
           <Link to="/login" className="font-medium text-ink underline underline-offset-4 hover:text-accent">
             Sign in
           </Link>

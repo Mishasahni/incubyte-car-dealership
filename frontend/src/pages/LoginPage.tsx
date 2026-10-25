@@ -9,9 +9,10 @@ export function LoginPage() {
 
   return (
     <AuthForm
-      title="Sign in"
-      subtitle="Access the vehicle inventory."
+      title="Welcome back"
+      subtitle="Sign in to continue to your account."
       submitLabel="Sign in"
+      pendingLabel="Signing in…"
       enforcePasswordPolicy={false}
       notice={notice}
       onSubmit={async (email, password) => {
@@ -20,9 +21,9 @@ export function LoginPage() {
       }}
       footer={
         <>
-          No account yet?{' '}
+          New to Masar Auto?{' '}
           <Link to="/register" className="font-medium text-ink underline underline-offset-4 hover:text-accent">
-            Create one
+            Create an account
           </Link>
         </>
       }
