@@ -6,7 +6,6 @@ import pytest
 from sqlalchemy import func, select
 
 from app.models import Vehicle
-from tests.factories import auth_headers, make_user
 
 URL = "/api/vehicles"
 VALID = {
@@ -16,12 +15,6 @@ VALID = {
     "price": 21999.99,
     "quantity": 3,
 }
-
-
-@pytest.fixture
-def admin_headers(db_session, test_settings) -> dict[str, str]:
-    admin = make_user(db_session, email="admin@dealership.com", role="admin")
-    return auth_headers(admin, test_settings)
 
 
 def count_vehicles(session) -> int:
