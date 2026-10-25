@@ -11,6 +11,7 @@ A full-stack inventory system for a car dealership, built for the Incubyte Softw
 - [Architecture](#architecture)
 - [Permissions](#permissions)
 - [Getting started](#getting-started)
+- [Demo access](#demo-access)
 - [Running the tests](#running-the-tests)
 - [API](#api)
 - [Screenshots](#screenshots)
@@ -65,6 +66,7 @@ Planning documents are in [`docs/`](docs): [requirements and traceability](docs/
 | Endpoint | Signed out | Regular user | Admin |
 |---|---|---|---|
 | `POST /api/auth/register`, `POST /api/auth/login` | ✅ | ✅ | ✅ |
+| `GET /api/auth/demo`, `POST /api/auth/demo/{buyer\|admin}` (only when the server enables demo access) | ✅ | ✅ | ✅ |
 | `GET /api/vehicles`, `GET /api/vehicles/search` | 401 | ✅ | ✅ |
 | `POST /api/vehicles/:id/purchase` | 401 | ✅ | ✅ |
 | `POST /api/vehicles` (add), `PUT /api/vehicles/:id` (update) | 401 | 403 | ✅ |
@@ -155,6 +157,46 @@ Open http://localhost:5173.
 - The frontend calls `http://localhost:8000` by default; set `VITE_API_URL` in `frontend/.env` to change it.
 - The backend allows browser requests only from origins listed in `CORS_ORIGINS`, which defaults to `["http://localhost:5173"]`.
 
+## Demo access
+
+For evaluators, the sign-in page can offer **Explore the demo**, a small section below the form. It opens a dialog with two choices:
+
+- **Explore as Buyer:** browse and search the inventory, see prices and stock, and purchase vehicles.
+- **Explore as Admin:** add, edit, restock and delete vehicles.
+
+![Sign-in page with the demo entry](docs/screenshots/15-login-demo-entry.jpg)
+
+**How it works**
+
+- The server signs in one of two dedicated demo accounts through the normal password check, and returns the normal login response.
+- The demo passwords stay on the server. They are never sent to the browser, never returned by an API, and never printed.
+- Before signing in, the server checks the account's role in the database matches the button: the buyer button can only ever produce a regular-user session.
+- Admin requests are still checked against the database role on every call.
+- Registration still always creates regular users.
+
+**Setting it up**
+
+1. In the server environment or `backend/.env`, never in git, set dedicated demo credentials: `DEMO_BUYER_EMAIL`, `DEMO_BUYER_PASSWORD`, `DEMO_ADMIN_EMAIL` and `DEMO_ADMIN_PASSWORD`. The passwords must be 8–128 characters. Never use a personal account.
+2. Create the accounts:
+
+   ```bash
+   .venv/bin/python -m scripts.create_demo_accounts
+   ```
+
+   - It creates a regular buyer and a separate admin, and is safe to re-run.
+   - It refuses to change an existing account that isn't already that demo account.
+   - It prints no passwords.
+3. Set `DEMO_ACCESS_ENABLED=true` and restart the API.
+
+**Turning it off:** set `DEMO_ACCESS_ENABLED=false`, or remove the demo credentials, and restart the API. The entry then disappears from the sign-in page; no frontend change is needed.
+
+**Limitations**
+
+- While demo access is on, anyone who can reach the site can open the demo admin session. The demo admin can change or delete every vehicle in that database.
+- Use it only with a separate demo database holding no real data, and expect other visitors to change it.
+- Demo sign-in isn't rate-limited (the API has no rate limiting).
+- No deployed demo exists yet; these steps were verified locally.
+
 ## Running the tests
 
 ```bash
@@ -175,6 +217,8 @@ All `/api/vehicles` endpoints need `Authorization: Bearer <token>`. Errors use F
 |---|---|---|---|
 | `POST /api/auth/register` | `{email, password}` (8–128 chars) | 201 `{id, email, role}` | 409 email taken, 422 |
 | `POST /api/auth/login` | `{email, password}` | 200 `{access_token, token_type, user}` | 401, 422 |
+| `GET /api/auth/demo` | — | 200 `{enabled, roles}` (never emails or passwords) | — |
+| `POST /api/auth/demo/{buyer\|admin}` | — (no password) | 200 `{access_token, token_type, user}` | 404 demo off, 422 unknown role, 503 account not set up |
 | `GET /api/vehicles` | — | 200 list (all vehicles, oldest first) | 401 |
 | `GET /api/vehicles/search` | query `make`, `model`, `category`, `min_price`, `max_price` | 200 list | 401, 422 (e.g. min > max) |
 | `POST /api/vehicles` | `{make, model, category, price, quantity}` | 201 vehicle | 401, 403, 422 |
