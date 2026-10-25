@@ -1,9 +1,11 @@
 """Vehicle endpoints. Every route here requires a valid bearer token."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.deps import DbSession, get_current_user, require_admin
-from app.schemas.vehicle import VehicleCreate, VehicleResponse, VehicleUpdate
+from app.schemas.vehicle import VehicleCreate, VehicleResponse, VehicleSearch, VehicleUpdate
 from app.services import vehicle_service
 
 router = APIRouter(
@@ -16,6 +18,14 @@ router = APIRouter(
 @router.get("", response_model=list[VehicleResponse])
 def list_vehicles(session: DbSession) -> list[VehicleResponse]:
     return [VehicleResponse.model_validate(v) for v in vehicle_service.list_vehicles(session)]
+
+
+@router.get("/search", response_model=list[VehicleResponse])
+def search_vehicles(
+    filters: Annotated[VehicleSearch, Query()], session: DbSession
+) -> list[VehicleResponse]:
+    vehicles = vehicle_service.search_vehicles(session, filters)
+    return [VehicleResponse.model_validate(v) for v in vehicles]
 
 
 @router.post(
