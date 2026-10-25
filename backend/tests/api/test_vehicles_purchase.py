@@ -46,3 +46,11 @@ def test_buying_a_vehicle_with_no_stock_returns_409_and_stock_stays_zero(
     assert response.status_code == 409
     assert response.json()["detail"] == "Vehicle is out of stock"
     assert stored_quantity(db_session, vehicle.id) == 0
+
+
+def test_buying_a_vehicle_that_does_not_exist_returns_404(client, user_headers):
+    """API-INV-04"""
+    response = client.post(url(99999), headers=user_headers)
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Vehicle not found"
