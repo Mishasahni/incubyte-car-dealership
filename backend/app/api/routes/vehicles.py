@@ -68,6 +68,8 @@ def purchase_vehicle(vehicle_id: int, session: DbSession) -> VehicleResponse:
     """Any logged-in user may buy one unit; no request body."""
     try:
         vehicle = inventory_service.purchase(session, vehicle_id)
+    except vehicle_service.VehicleNotFoundError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Vehicle not found") from error
     except inventory_service.OutOfStockError as error:
         raise HTTPException(status.HTTP_409_CONFLICT, "Vehicle is out of stock") from error
     return VehicleResponse.model_validate(vehicle)
