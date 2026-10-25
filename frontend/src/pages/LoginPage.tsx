@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router'
 
 import { useAuth } from '../auth/AuthContext'
+import { DemoAccess } from '../components/auth/DemoAccess'
 import { AuthForm } from './AuthForm'
 
 export function LoginPage() {
@@ -19,6 +20,7 @@ export function LoginPage() {
         await signIn(email, password)
         navigate('/', { replace: true })
       }}
+      after={<DemoAccess onSignedIn={() => navigate('/', { replace: true })} />}
       footer={
         <>
           New to Masar Auto?{' '}

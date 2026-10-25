@@ -15,10 +15,12 @@ interface AuthFormProps {
   notice?: string | null
   onSubmit: (email: string, password: string) => Promise<void>
   footer: ReactNode
+  /** Optional content below the footer, such as the sign-in page's demo entry. */
+  after?: ReactNode
 }
 
 /** Shared sign-in / registration form: validates locally, then shows the server's message. */
-export function AuthForm({ title, subtitle, submitLabel, pendingLabel, enforcePasswordPolicy, notice, onSubmit, footer }: AuthFormProps) {
+export function AuthForm({ title, subtitle, submitLabel, pendingLabel, enforcePasswordPolicy, notice, onSubmit, footer, after }: AuthFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<CredentialErrors>({})
@@ -81,6 +83,7 @@ export function AuthForm({ title, subtitle, submitLabel, pendingLabel, enforcePa
         </button>
       </form>
       <p className="mt-8 text-sm text-muted">{footer}</p>
+      {after}
     </AuthLayout>
   )
 }

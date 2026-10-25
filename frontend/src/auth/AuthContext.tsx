@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import * as authApi from '../api/auth'
-import type { User } from '../api/auth'
+import type { DemoRole, LoginResponse, User } from '../api/auth'
 import { onUnauthorized } from '../api/client'
 import { clearSession, loadSession, saveSession, type Session } from './session'
 
@@ -11,6 +11,8 @@ interface AuthValue {
   /** Shown on the sign-in page after an expired session. */
   notice: string | null
   signIn: (email: string, password: string) => Promise<void>
+  /** Sign in the server's dedicated demo account for a role, when demo access is on. */
+  signInAsDemo: (role: DemoRole) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => void
 }
@@ -21,13 +23,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => loadSession())
   const [notice, setNotice] = useState<string | null>(null)
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const response = await authApi.login(email, password)
+  const startSession = useCallback((response: LoginResponse) => {
     const next = { token: response.access_token, user: response.user }
     saveSession(next)
     setNotice(null)
     setSession(next)
   }, [])
+
+  const signIn = useCallback(
+    async (email: string, password: string) => startSession(await authApi.login(email, password)),
+    [startSession],
+  )
+
+  const signInAsDemo = useCallback(
+    async (role: DemoRole) => startSession(await authApi.demoLogin(role)),
+    [startSession],
+  )
 
   const signUp = useCallback(
     async (email: string, password: string) => {
@@ -57,10 +68,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAdmin: session?.user.role === 'admin',
       notice,
       signIn,
+      signInAsDemo,
       signUp,
       signOut,
     }),
-    [session, notice, signIn, signUp, signOut],
+    [session, notice, signIn, signInAsDemo, signUp, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
