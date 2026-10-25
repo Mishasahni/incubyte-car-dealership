@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.deps import DbSession, get_current_user, require_admin
 from app.schemas.vehicle import VehicleCreate, VehicleResponse, VehicleSearch, VehicleUpdate
-from app.services import vehicle_service
+from app.services import inventory_service, vehicle_service
 
 router = APIRouter(
     prefix="/api/vehicles",
@@ -61,3 +61,9 @@ def delete_vehicle(vehicle_id: int, session: DbSession) -> None:
         vehicle_service.delete_vehicle(session, vehicle_id)
     except vehicle_service.VehicleNotFoundError as error:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Vehicle not found") from error
+
+
+@router.post("/{vehicle_id}/purchase", response_model=VehicleResponse)
+def purchase_vehicle(vehicle_id: int, session: DbSession) -> VehicleResponse:
+    """Any logged-in user may buy one unit; no request body."""
+    return VehicleResponse.model_validate(inventory_service.purchase(session, vehicle_id))
